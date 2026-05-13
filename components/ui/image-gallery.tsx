@@ -16,7 +16,6 @@ export interface ImageGalleryItem {
 interface ImageGalleryProps {
   items: ImageGalleryItem[];
   className?: string;
-  height?: string;
   /** Clase extra para cada card, útil para targeting de GSAP */
   itemClassName?: string;
 }
@@ -27,17 +26,20 @@ interface ImageGalleryProps {
  *
  * Solo para desktop / tablet ≥ 768px. En mobile usar MobileGallery con
  * scroll-snap horizontal.
+ *
+ * IMPORTANTE: cada <button> tiene `h-[480px]` HARDCODED (no via prop) para que
+ * `next/image` con `fill` pueda calcular su tamaño correctamente. Si el botón
+ * no tiene altura explícita, fill renderiza con height 0 y next/image avisa.
  */
 export function ImageGallery({
   items,
   className,
-  height = "h-[480px]",
   itemClassName,
 }: ImageGalleryProps) {
   return (
     <div
       className={cn(
-        "flex w-full max-w-6xl items-stretch gap-2 mx-auto",
+        "relative flex h-[480px] w-full max-w-6xl items-stretch gap-2 mx-auto",
         className
       )}
     >
@@ -48,11 +50,10 @@ export function ImageGallery({
           type="button"
           aria-label={`Explorar categoría ${item.label}`}
           className={cn(
-            "group relative flex-grow w-44 overflow-hidden rounded-2xl cursor-pointer transition-all",
+            "relative group flex-grow w-44 h-[480px] overflow-hidden rounded-2xl cursor-pointer transition-all",
             "duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]",
             "hover:flex-[5] focus-visible:flex-[5]",
             "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-bb-pink focus-visible:ring-offset-2",
-            height,
             itemClassName
           )}
         >

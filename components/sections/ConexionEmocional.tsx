@@ -2,15 +2,18 @@
 
 import * as React from "react";
 import Image from "next/image";
-import {
-  motion,
-  useScroll,
-  useTransform,
-  useReducedMotion,
-} from "framer-motion";
+import { useReducedMotion } from "framer-motion";
+import { useGSAP } from "@gsap/react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
 import { Button } from "@/components/ui/button";
 import { useQuiz } from "@/components/quiz/QuizProvider";
 import { useHasMounted } from "@/lib/use-has-mounted";
+
+if (typeof window !== "undefined") {
+  gsap.registerPlugin(ScrollTrigger);
+}
 
 const EMOCIONES = ["Magia", "Aventura", "Asombro", "Amor", "Ternura", "Orgullo"];
 
@@ -18,22 +21,42 @@ export function ConexionEmocional() {
   const { open } = useQuiz();
   const reduced = useReducedMotion();
   const mounted = useHasMounted();
-  const ref = React.useRef<HTMLDivElement>(null);
-  // Pasamos target solo post-mount para evitar el warning de scroll offset
-  // que ocurre cuando framer intenta medir un ref antes de que esté en DOM.
-  const { scrollYProgress } = useScroll({
-    target: mounted ? ref : undefined,
-    offset: ["start end", "end start"],
-  });
-  const y = useTransform(scrollYProgress, [0, 1], [-30, 30]);
-  const enableParallax = mounted && !reduced;
+  const sectionRef = React.useRef<HTMLDivElement>(null);
+  const imageRef = React.useRef<HTMLDivElement>(null);
+
+  // Parallax vía GSAP ScrollTrigger (en vez de Framer useScroll) — evita
+  // el warning de scroll offset porque GSAP no requiere ancestro positioned.
+  useGSAP(
+    () => {
+      if (reduced || !mounted || !imageRef.current) return;
+
+      gsap.fromTo(
+        imageRef.current,
+        { y: -30 },
+        {
+          y: 30,
+          ease: "none",
+          scrollTrigger: {
+            trigger: imageRef.current,
+            start: "top bottom",
+            end: "bottom top",
+            scrub: 1,
+          },
+        }
+      );
+    },
+    { scope: sectionRef, dependencies: [mounted, reduced] }
+  );
 
   return (
-    <section ref={ref} className="relative bg-bb-white py-20 md:py-28">
+    <section
+      ref={sectionRef}
+      className="relative bg-bb-white py-20 md:py-28"
+    >
       <div className="mx-auto grid max-w-7xl items-center gap-12 px-6 md:grid-cols-2">
-        {/* Imagen con parallax sutil — gated post-mount */}
-        <motion.div
-          style={enableParallax ? { y } : undefined}
+        {/* Imagen con parallax via GSAP (post-mount, sin reduce-motion) */}
+        <div
+          ref={imageRef}
           className="relative aspect-[4/5] overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-bb-pink-soft to-bb-purple-soft/30 shadow-bb-soft md:aspect-[4/4]"
         >
           <Image
@@ -45,7 +68,7 @@ export function ConexionEmocional() {
             unoptimized
           />
           <div className="absolute inset-0 bg-gradient-to-t from-bb-purple/30 via-transparent to-transparent" />
-        </motion.div>
+        </div>
 
         {/* Copy */}
         <div>
