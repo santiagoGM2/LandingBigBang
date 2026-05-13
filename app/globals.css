@@ -1,0 +1,217 @@
+@import "tailwindcss";
+
+/* ─── Big Bang Cali · tokens de marca ─────────────────────────── */
+:root {
+  /* Marca */
+  --bb-pink: #e91e8c;
+  --bb-lime: #7dc720;
+  --bb-purple: #3d1a6e;
+
+  /* Derivados */
+  --bb-pink-soft: #fce4f1;
+  --bb-lime-soft: #e8f5d6;
+  --bb-purple-soft: #5e3a8c;
+
+  /* Neutrales */
+  --bb-white: #ffffff;
+  --bb-gray: #f7f7f7;
+  --bb-text: #222222;
+
+  /* Sombras de marca */
+  --bb-shadow-pink: 0 18px 40px -18px rgba(233, 30, 140, 0.45);
+  --bb-shadow-soft: 0 24px 48px -28px rgba(61, 26, 110, 0.22);
+}
+
+@theme inline {
+  /* Colores expuestos a Tailwind (bg-bb-pink, text-bb-text, etc) */
+  --color-bb-pink: var(--bb-pink);
+  --color-bb-pink-soft: var(--bb-pink-soft);
+  --color-bb-lime: var(--bb-lime);
+  --color-bb-lime-soft: var(--bb-lime-soft);
+  --color-bb-purple: var(--bb-purple);
+  --color-bb-purple-soft: var(--bb-purple-soft);
+  --color-bb-white: var(--bb-white);
+  --color-bb-gray: var(--bb-gray);
+  --color-bb-text: var(--bb-text);
+
+  /* Tipografía */
+  --font-sans: var(--font-nunito), "Nunito", system-ui, sans-serif;
+
+  /* Radios bubble */
+  --radius-bubble: 1.75rem;
+}
+
+/* ─── Reset y base ────────────────────────────────────────────── */
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--bb-white);
+  color: var(--bb-text);
+  font-family: var(--font-sans);
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Selección de texto en rosa marca */
+::selection {
+  background: var(--bb-pink);
+  color: #fff;
+}
+
+/* Mejora de accesibilidad en focus */
+:focus-visible {
+  outline: 3px solid var(--bb-pink);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Skip link visible solo en focus */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 9999;
+  background: var(--bb-pink);
+  color: #fff;
+  padding: 0.75rem 1rem;
+  font-weight: 700;
+}
+.skip-link:focus {
+  left: 1rem;
+  top: 1rem;
+}
+
+/* ─── Keyframes globales ──────────────────────────────────────── */
+@keyframes bb-marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+@keyframes bb-marquee-reverse {
+  from { transform: translateX(-50%); }
+  to   { transform: translateX(0); }
+}
+
+@keyframes bb-marquee-y {
+  from { transform: translateY(0); }
+  to   { transform: translateY(-50%); }
+}
+
+@keyframes bb-marquee-y-reverse {
+  from { transform: translateY(-50%); }
+  to   { transform: translateY(0); }
+}
+
+@keyframes bb-float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-6px); }
+}
+
+@keyframes bb-pulse-soft {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(233, 30, 140, 0.45); }
+  50%      { box-shadow: 0 0 0 12px rgba(233, 30, 140, 0); }
+}
+
+@keyframes bb-beam-spin {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to   { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+@keyframes bb-shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* Radix accordion (necesita variable de altura calculada por Radix) */
+@keyframes accordion-down {
+  from { height: 0; }
+  to   { height: var(--radix-accordion-content-height); }
+}
+@keyframes accordion-up {
+  from { height: var(--radix-accordion-content-height); }
+  to   { height: 0; }
+}
+.animate-accordion-down { animation: accordion-down 240ms ease-out; }
+.animate-accordion-up   { animation: accordion-up   200ms ease-out; }
+
+/* Radix dialog (fade básico, se aplica vía data-[state=...]:animate-[...] en TSX) */
+@keyframes bb-fade-in  { from { opacity: 0; } to { opacity: 1; } }
+@keyframes bb-fade-out { from { opacity: 1; } to { opacity: 0; } }
+@keyframes bb-zoom-in  { from { opacity: 0; transform: translate(-50%, -50%) scale(0.96); }
+                          to   { opacity: 1; transform: translate(-50%, -50%) scale(1); } }
+
+/* Utilidades animadas accesibles */
+.animate-marquee       { animation: bb-marquee 40s linear infinite; }
+.animate-marquee-rev   { animation: bb-marquee-reverse 50s linear infinite; }
+.animate-marquee-y     { animation: bb-marquee-y 50s linear infinite; }
+.animate-marquee-y-rev { animation: bb-marquee-y-reverse 60s linear infinite; }
+
+/* CTA Final: tinte purpura sutil que pulsa cada 8s */
+@keyframes bb-cta-tint {
+  0%, 100% { opacity: 0; }
+  50%      { opacity: 0.06; }
+}
+.animate-bb-cta-tint { animation: bb-cta-tint 8s ease-in-out infinite; }
+
+/* Loading screen logo: scale 0 + rotateY -360 → final, 1.2s con overshoot */
+@keyframes bb-loading-logo {
+  from { opacity: 0; transform: scale(0) rotateY(-360deg); }
+  to   { opacity: 1; transform: scale(1) rotateY(0); }
+}
+.animate-bb-loading-logo {
+  animation: bb-loading-logo 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  transform-style: preserve-3d;
+}
+.animate-bb-float      { animation: bb-float 3s ease-in-out infinite; }
+.animate-bb-pulse-soft { animation: bb-pulse-soft 2.2s ease-out infinite; }
+
+/* Bento utilities para galería DEC */
+.bento-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-auto-rows: 220px;
+  gap: 0.75rem;
+}
+@media (min-width: 768px) {
+  .bento-grid {
+    grid-template-columns: repeat(4, 1fr);
+    grid-auto-rows: 240px;
+    gap: 1rem;
+  }
+}
+@media (min-width: 1280px) {
+  .bento-grid {
+    grid-template-columns: repeat(6, 1fr);
+    grid-auto-rows: 220px;
+  }
+}
+
+.bento-2x2 { grid-column: span 2; grid-row: span 2; }
+.bento-2x1 { grid-column: span 2; }
+.bento-1x2 { grid-row: span 2; }
+
+@media (max-width: 767px) {
+  .bento-2x2, .bento-2x1, .bento-1x2 { grid-column: span 2; grid-row: span 1; }
+}
+
+/* Sombra utilidad rápida */
+.shadow-bb-soft { box-shadow: var(--bb-shadow-soft); }
+.shadow-bb-pink { box-shadow: var(--bb-shadow-pink); }
+
+/* Respeto a usuarios con prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  .animate-marquee, .animate-marquee-rev,
+  .animate-bb-float, .animate-bb-pulse-soft { animation: none; }
+}

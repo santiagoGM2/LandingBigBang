@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 200" role="img" aria-label="Big Bang Cali">
+  <defs>
+    <filter id="bb-shadow" x="-10%" y="-10%" width="120%" height="125%">
+      <feOffset dx="0" dy="4"/>
+      <feColorMatrix type="matrix" values="0 0 0 0 0.239 0 0 0 0 0.102 0 0 0 0 0.431 0 0 0 1 0"/>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <g filter="url(#bb-shadow)" font-family="Nunito, system-ui, sans-serif" font-weight="900" text-anchor="middle" paint-order="stroke">
+    <text x="140" y="88" font-size="84" stroke="#7DC720" stroke-width="6" stroke-linejoin="round" fill="#E91E8C">BIG</text>
+    <text x="140" y="170" font-size="84" stroke="#7DC720" stroke-width="6" stroke-linejoin="round" fill="#E91E8C">BANG</text>
+  </g>
+</svg>
