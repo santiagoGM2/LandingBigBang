@@ -169,8 +169,8 @@ function HorizontalEspejo({ scenes }: { scenes: Scene[] }) {
         scrollTrigger: {
           trigger: sectionRef.current,
           start: "top top",
-          end: "+=280%",
-          scrub: 1,
+          end: "+=180%",
+          scrub: 0.5,
           pin: true,
           anticipatePin: 1,
           onUpdate: (self) => {
@@ -188,34 +188,34 @@ function HorizontalEspejo({ scenes }: { scenes: Scene[] }) {
         0
       );
 
-      // Fade-out de toda la sección en los últimos 10% del timeline
+      // Fade-out de toda la sección en los últimos 13% del timeline
       tl.to(
         sectionRef.current,
-        { opacity: 0, duration: 0.3, ease: "power1.in" },
-        ">-0.3"
+        { opacity: 0, duration: 0.4, ease: "power2.in" },
+        ">-0.4"
       );
 
-      // Flash transición entre escenas 1→2 y 2→3
+      // Flash transición rápida entre escenas 1→2 y 2→3
       if (transitionOverlayRef.current) {
         tl.to(
           transitionOverlayRef.current,
-          { opacity: 0.6, duration: 0.15, ease: "power2.in" },
+          { opacity: 0.6, duration: 0.08, ease: "power2.in" },
           0.95
         )
           .to(
             transitionOverlayRef.current,
-            { opacity: 0, duration: 0.15, ease: "power2.out" },
-            1.1
+            { opacity: 0, duration: 0.08, ease: "power2.out" },
+            1.05
           )
           .to(
             transitionOverlayRef.current,
-            { opacity: 0.6, duration: 0.15, ease: "power2.in" },
+            { opacity: 0.6, duration: 0.08, ease: "power2.in" },
             1.95
           )
           .to(
             transitionOverlayRef.current,
-            { opacity: 0, duration: 0.15, ease: "power2.out" },
-            2.1
+            { opacity: 0, duration: 0.08, ease: "power2.out" },
+            2.05
           );
       }
 
@@ -233,8 +233,8 @@ function HorizontalEspejo({ scenes }: { scenes: Scene[] }) {
             ease: "none",
             scrollTrigger: {
               trigger: sectionRef.current,
-              start: `top+=${(i / sceneCount) * 280}% top`,
-              end: `top+=${((i + 1) / sceneCount) * 280}% top`,
+              start: `top+=${(i / sceneCount) * 180}% top`,
+              end: `top+=${((i + 1) / sceneCount) * 180}% top`,
               scrub: 1,
             },
           }
@@ -256,15 +256,15 @@ function HorizontalEspejo({ scenes }: { scenes: Scene[] }) {
             ease: "back.out(1.4)",
             scrollTrigger: {
               trigger: sectionRef.current,
-              start: `top+=${(i / sceneCount) * 280}% top`,
-              end: `top+=${(i / sceneCount + 0.3 / sceneCount) * 280}% top`,
+              start: `top+=${(i / sceneCount) * 180}% top`,
+              end: `top+=${(i / sceneCount + 0.3 / sceneCount) * 180}% top`,
               scrub: 1,
             },
           }
         );
       });
     },
-    { scope: sectionRef, dependencies: [scenes.length] }
+    { scope: sectionRef, dependencies: [] }
   );
 
   // Mobile guard: si entra mobile renderiza StaticEspejo

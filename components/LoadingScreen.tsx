@@ -55,11 +55,11 @@ export function LoadingScreen() {
       /* ignore — proceed con animación */
     }
 
-    const t1 = window.setTimeout(() => setPhase("revealing"), 1500);
+    const t1 = window.setTimeout(() => setPhase("revealing"), 1100);
     const t2 = window.setTimeout(() => {
       setPhase("done");
       dispatchDone();
-    }, 2300);
+    }, 1700);
 
     return () => {
       window.clearTimeout(t1);
@@ -75,7 +75,7 @@ export function LoadingScreen() {
       style={{
         clipPath:
           phase === "revealing" ? "inset(0 0 100% 0)" : "inset(0 0 0 0)",
-        transition: "clip-path 800ms cubic-bezier(0.83, 0, 0.17, 1)",
+        transition: "clip-path 600ms cubic-bezier(0.83, 0, 0.17, 1)",
       }}
       className={cn(
         "fixed inset-0 z-[100] grid place-items-center overflow-hidden",

@@ -89,12 +89,12 @@ export function StatsPotenciadas() {
         },
       });
 
-      // Entrance básico: translateY 40 → 0, opacity 0 → 1, stagger 80ms
+      // Entrance básico: translateY 40 → 0, opacity 0 → 1, stagger 60ms
       tl.from(".bb-stat-card", {
         y: 40,
         opacity: 0,
-        stagger: 0.08,
-        duration: 0.5,
+        stagger: 0.06,
+        duration: 0.4,
         ease: "power2.out",
       });
 
@@ -104,8 +104,8 @@ export function StatsPotenciadas() {
           ".bb-stat-card",
           {
             rotateY: -90,
-            stagger: 0.1,
-            duration: 0.7,
+            stagger: 0.08,
+            duration: 0.55,
             ease: "back.out(1.2)",
           },
           "-=0.15"

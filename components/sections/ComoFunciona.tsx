@@ -65,8 +65,8 @@ export function ComoFunciona() {
         gsap.from(".como-card", {
           y: 32,
           opacity: 0,
-          stagger: 0.15,
-          duration: 0.7,
+          stagger: 0.1,
+          duration: 0.5,
           ease: "power2.out",
           scrollTrigger: {
             trigger: sectionRef.current,
@@ -77,13 +77,13 @@ export function ComoFunciona() {
         return;
       }
 
-      // Desktop: flip 3D dramático por card con stagger 0.18s
+      // Desktop: flip 3D dramático por card con stagger rápido
       gsap.from(".como-card", {
         rotateY: -90,
         z: -200,
         opacity: 0,
-        stagger: 0.18,
-        duration: 1,
+        stagger: 0.14,
+        duration: 0.7,
         ease: "power3.out",
         scrollTrigger: {
           trigger: sectionRef.current,
@@ -92,13 +92,13 @@ export function ComoFunciona() {
         },
       });
 
-      // Números gigantes detrás: entrada con yPercent y rotate sutil
+      // Números gigantes detrás
       gsap.from(".como-num", {
         yPercent: 50,
         opacity: 0,
         rotate: -8,
-        duration: 0.8,
-        stagger: 0.18,
+        duration: 0.6,
+        stagger: 0.14,
         ease: "power2.out",
         scrollTrigger: {
           trigger: sectionRef.current,
@@ -119,7 +119,7 @@ export function ComoFunciona() {
         },
       });
     },
-    { scope: sectionRef, dependencies: [enableMotion] }
+    { scope: sectionRef, dependencies: [enableMotion, mounted, reduced] }
   );
 
   return (

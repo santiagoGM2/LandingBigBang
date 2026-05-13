@@ -158,8 +158,8 @@ export function Escasez({ cuposOcupados = 2, cuposTotal = 3 }: Props) {
                       whileInView={animate ? { y: 0 } : undefined}
                       viewport={{ once: true, margin: "-60px" }}
                       transition={{
-                        duration: 0.9,
-                        delay: 0.2 + i * 0.18,
+                        duration: 0.6,
+                        delay: 0.12 + i * 0.12,
                         ease: [0.16, 1, 0.3, 1],
                       }}
                       className="absolute inset-0 bg-bb-pink"

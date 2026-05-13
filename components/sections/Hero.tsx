@@ -51,7 +51,7 @@ export function Hero() {
 
     let timer: ReturnType<typeof setTimeout> | undefined;
     const launch = () => {
-      timer = setTimeout(() => balloonsRef.current?.launchAnimation(), 800);
+      timer = setTimeout(() => balloonsRef.current?.launchAnimation(), 500);
     };
 
     const alreadyLoaded =
@@ -124,7 +124,7 @@ export function Hero() {
       {/* Marquee aspect 3/4, rotación alternada -2deg / 5deg, duration 40s */}
       <div className="relative z-10 pb-12 md:pb-16">
         <Marquee
-          duration={40}
+          duration={30}
           className="[mask-image:linear-gradient(90deg,transparent,#000_8%,#000_92%,transparent)]"
         >
           {IMAGES.map((img, i) => (

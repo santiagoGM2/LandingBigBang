@@ -42,7 +42,7 @@ export default function Page() {
       <Toaster
         position="bottom-center"
         theme="light"
-        duration={4500}
+        duration={3500}
         icons={{
           success: <CircleCheck className="h-5 w-5 text-bb-lime" />,
           error: <AlertTriangle className="h-5 w-5 text-red-500" />,

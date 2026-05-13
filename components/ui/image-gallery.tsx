@@ -46,7 +46,7 @@ export function ImageGallery({ items, className }: ImageGalleryProps) {
           className={cn(
             "bb-cat-card group relative overflow-hidden rounded-2xl cursor-pointer",
             "flex-1 min-w-0",
-            "transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]",
+            "transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]",
             "hover:flex-[5] focus-visible:flex-[5]",
             "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-bb-pink focus-visible:ring-offset-2"
           )}

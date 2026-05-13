@@ -27,8 +27,8 @@ export function BalloonsRain({ count = 14, colors = DEFAULT_COLORS }: Props) {
   const balloons = Array.from({ length: count }, (_, i) => ({
     left: (i * 17 + 7) % 100,
     size: 30 + ((i * 13) % 40),
-    duration: 8 + ((i * 7) % 6),
-    delay: (i * 0.7) % 5,
+    duration: 5 + ((i * 7) % 5),
+    delay: (i * 0.4) % 3,
     color: colors[i % colors.length],
   }));
 

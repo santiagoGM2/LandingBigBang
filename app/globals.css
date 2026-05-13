@@ -155,7 +155,7 @@ body {
   0%, 100% { opacity: 0; }
   50%      { opacity: 0.06; }
 }
-.animate-bb-cta-tint { animation: bb-cta-tint 8s ease-in-out infinite; }
+.animate-bb-cta-tint { animation: bb-cta-tint 5s ease-in-out infinite; }
 
 /* Lluvia de globos cayendo continuo (BalloonsRain en CTA Final) */
 @keyframes bb-balloon-fall {
@@ -171,7 +171,7 @@ body {
   to   { opacity: 1; transform: scale(1) rotateY(0); }
 }
 .animate-bb-loading-logo {
-  animation: bb-loading-logo 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  animation: bb-loading-logo 0.9s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
   transform-style: preserve-3d;
 }
 .animate-bb-float      { animation: bb-float 3s ease-in-out infinite; }

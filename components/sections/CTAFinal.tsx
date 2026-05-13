@@ -36,8 +36,8 @@ export function CTAFinal() {
   // Magnetic translate
   const mx = useMotionValue(0);
   const my = useMotionValue(0);
-  const sx = useSpring(mx, { stiffness: 180, damping: 18 });
-  const sy = useSpring(my, { stiffness: 180, damping: 18 });
+  const sx = useSpring(mx, { stiffness: 240, damping: 14 });
+  const sy = useSpring(my, { stiffness: 240, damping: 14 });
 
   // Tilt 3D basado en posición del cursor dentro del botón
   const tiltXRaw = useMotionValue(0);
@@ -175,7 +175,7 @@ export function CTAFinal() {
               <Sparkles className="h-6 w-6 transition-transform group-hover:rotate-12" />
               Empezar mi quiz ahora
             </motion.button>
-            <BorderBeam duration={5} colorFrom="#FFFFFF" colorTo="#7DC720" />
+            <BorderBeam duration={3.5} colorFrom="#FFFFFF" colorTo="#7DC720" />
           </div>
         </motion.div>
       </div>

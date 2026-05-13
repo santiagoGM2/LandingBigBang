@@ -95,7 +95,7 @@ export function Footer() {
           viewport={{ once: true, margin: "-40px" }}
           variants={{
             hidden: {},
-            visible: { transition: { staggerChildren: 0.1, delayChildren: 0.05 } },
+            visible: { transition: { staggerChildren: 0.06, delayChildren: 0.05 } },
           }}
           className="grid gap-10 md:grid-cols-4"
         >

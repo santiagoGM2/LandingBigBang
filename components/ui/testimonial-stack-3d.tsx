@@ -27,7 +27,7 @@ interface Props {
 }
 
 const SWIPE_THRESHOLD = 100;
-const FLING_DURATION = 0.8;
+const FLING_DURATION = 0.5;
 const FLING_DISTANCE = 620;
 
 /**
@@ -61,7 +61,7 @@ export function TestimonialStack3D({ items, className }: Props) {
       if (exitingId === null) {
         setOrder((o) => [...o.slice(1), o[0]]);
       }
-    }, 8000);
+    }, 5000);
     return () => window.clearInterval(id);
   }, [reduced, exitingId]);
 
