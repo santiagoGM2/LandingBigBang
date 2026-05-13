@@ -1,9 +1,7 @@
 "use client";
 
-import * as React from "react";
-import Image from "next/image";
-import { ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ArrowRight } from "lucide-react";
 
 export interface ImageGalleryItem {
   src: string;
@@ -16,32 +14,28 @@ export interface ImageGalleryItem {
 interface ImageGalleryProps {
   items: ImageGalleryItem[];
   className?: string;
-  /** Clase extra para cada card, útil para targeting de GSAP */
-  itemClassName?: string;
 }
 
 /**
- * Expanding image gallery (patrón 21st.dev). Cards angostas en row que
- * crecen a `flex-[5]` en hover o focus, mientras las otras se comprimen.
+ * Expanding image gallery — versión simplificada y garantizada.
  *
- * Solo para desktop / tablet ≥ 768px. En mobile usar MobileGallery con
- * scroll-snap horizontal.
+ * Usa <img> HTML estándar (NO next/image fill) para eliminar la dependencia
+ * de altura calculada del padre. La altura 480px se define en tres lugares
+ * (container, button inline, className) intencionalmente redundante para que
+ * la card siempre se vea, pase lo que pase con el wrapping de motion.div o
+ * AnimatePresence en el padre.
  *
- * IMPORTANTE: cada <button> tiene `h-[480px]` HARDCODED (no via prop) para que
- * `next/image` con `fill` pueda calcular su tamaño correctamente. Si el botón
- * no tiene altura explícita, fill renderiza con height 0 y next/image avisa.
+ * Cada button arranca con `flex: 1 1 0` inline. Al hover el `hover:flex-[5]`
+ * de Tailwind override y la card se expande mientras las otras se comprimen.
  */
-export function ImageGallery({
-  items,
-  className,
-  itemClassName,
-}: ImageGalleryProps) {
+export function ImageGallery({ items, className }: ImageGalleryProps) {
   return (
     <div
       className={cn(
-        "relative flex h-[480px] w-full max-w-6xl items-stretch gap-2 mx-auto",
+        "flex items-stretch gap-2 w-full max-w-6xl mx-auto px-4",
         className
       )}
+      style={{ height: "480px" }}
     >
       {items.map((item, idx) => (
         <button
@@ -50,26 +44,25 @@ export function ImageGallery({
           type="button"
           aria-label={`Explorar categoría ${item.label}`}
           className={cn(
-            "relative group flex-grow w-44 h-[480px] overflow-hidden rounded-2xl cursor-pointer transition-all",
-            "duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]",
+            "bb-cat-card group relative overflow-hidden rounded-2xl cursor-pointer",
+            "transition-[flex] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]",
             "hover:flex-[5] focus-visible:flex-[5]",
-            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-bb-pink focus-visible:ring-offset-2",
-            itemClassName
+            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-bb-pink focus-visible:ring-offset-2"
           )}
+          style={{ flex: "1 1 0", minWidth: 0, height: "480px" }}
         >
-          <Image
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
             src={item.src}
             alt={item.alt}
-            fill
-            sizes="(max-width: 768px) 240px, (max-width: 1280px) 30vw, 20vw"
-            className="object-cover object-center transition-transform duration-700 group-hover:scale-105 group-focus-visible:scale-105"
-            unoptimized
+            className="absolute inset-0 h-full w-full object-cover object-center transition-transform duration-700 group-hover:scale-105"
+            loading="lazy"
           />
 
-          {/* Gradient overlay base */}
+          {/* Overlay gradient morado */}
           <div className="absolute inset-0 bg-gradient-to-t from-bb-purple/95 via-bb-purple/40 to-transparent" />
 
-          {/* Sombra interna inferior para contraste extra del label */}
+          {/* Sombra interna inferior para contraste extra */}
           <div
             aria-hidden
             className="pointer-events-none absolute inset-0"
@@ -78,29 +71,29 @@ export function ImageGallery({
             }}
           />
 
-          {/* Estado colapsado: label vertical centrado */}
-          <div className="absolute inset-0 flex items-center justify-center transition-opacity duration-300 opacity-100 group-hover:opacity-0 group-focus-visible:opacity-0">
+          {/* Label vertical (estado colapsado) */}
+          <div className="absolute inset-0 flex items-center justify-center opacity-100 group-hover:opacity-0 group-focus-visible:opacity-0 transition-opacity duration-300">
             <span
-              className="text-white font-bold text-lg tracking-wide drop-shadow-lg"
+              className="px-2 text-center text-xl font-extrabold tracking-wide text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]"
               style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}
             >
               {item.label}
             </span>
           </div>
 
-          {/* Estado expandido: título + count + CTA */}
-          <div className="absolute inset-0 flex flex-col justify-end p-6 transition-opacity duration-300 delay-150 opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100">
-            <h3 className="text-white text-3xl md:text-4xl font-extrabold leading-tight drop-shadow-lg">
+          {/* Content expandido (estado hovered/focused) */}
+          <div className="absolute inset-x-0 bottom-0 p-6 opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-opacity duration-300 delay-150">
+            <h3 className="text-3xl md:text-4xl font-extrabold leading-tight text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]">
               {item.label}
             </h3>
             {item.count !== undefined && (
-              <p className="mt-2 text-bb-lime font-semibold text-base">
-                {item.count} {item.count === 1 ? "código" : "códigos"} disponibles
+              <p className="mt-2 text-lg font-bold text-bb-lime">
+                {item.count} {item.count === 1 ? "código" : "códigos"}
               </p>
             )}
-            <div className="mt-4 inline-flex items-center gap-2 text-white/90 text-sm">
+            <div className="mt-4 inline-flex items-center gap-2 font-semibold text-white">
               <span>Click para explorar</span>
-              <ArrowRight className="w-4 h-4" />
+              <ArrowRight className="h-4 w-4" />
             </div>
           </div>
         </button>

@@ -10,9 +10,6 @@ import {
   useTransform,
   useReducedMotion,
 } from "framer-motion";
-import { useGSAP } from "@gsap/react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { toast } from "sonner";
 import { ArrowLeft, Sparkles } from "lucide-react";
 
@@ -22,7 +19,6 @@ import {
 } from "@/components/ui/image-gallery";
 import { useQuiz } from "@/components/quiz/QuizProvider";
 import { useHasMounted } from "@/lib/use-has-mounted";
-import { useIsDesktop } from "@/lib/use-media-query";
 import {
   CODIGOS_DEC,
   CATEGORIA_LABEL,
@@ -30,22 +26,6 @@ import {
   type CodigoDec,
 } from "@/lib/codigos-dec";
 import { cn } from "@/lib/utils";
-
-if (typeof window !== "undefined") {
-  gsap.registerPlugin(ScrollTrigger);
-}
-
-/** Orden de categorías en la galería */
-const CATEGORIAS_ORDER: Categoria[] = [
-  "cumple_infantil",
-  "baby",
-  "religioso",
-  "grado",
-  "cumple_adulto",
-  "romantico",
-  "empresarial",
-  "especial",
-];
 
 const COUNT_BY_CAT: Record<Categoria, number> = CODIGOS_DEC.reduce(
   (acc, c) => {
@@ -55,45 +35,91 @@ const COUNT_BY_CAT: Record<Categoria, number> = CODIGOS_DEC.reduce(
   {} as Record<Categoria, number>
 );
 
-const REP_IMG_BY_CAT: Record<Categoria, string> = CATEGORIAS_ORDER.reduce(
-  (acc, cat) => {
-    const first = CODIGOS_DEC.find((c) => c.categoria === cat);
-    acc[cat] = first?.img ?? "";
-    return acc;
-  },
-  {} as Record<Categoria, string>
-);
+/**
+ * 8 items hardcoded — labels, imágenes y counts conocidos. onClick mapea al
+ * Categoria type del dataset para conservar el modo "explorando" intacto.
+ * Las URLs Unsplash son las del spec del cliente para esta versión.
+ */
+function buildItems(setSelected: (c: Categoria) => void): ImageGalleryItem[] {
+  return [
+    {
+      src: "https://images.unsplash.com/photo-1530103862676-de8c9debad1d?auto=format&fit=crop&w=600&h=900&q=80",
+      alt: "Decoración cumpleaños infantil",
+      label: "Cumple infantil",
+      count: COUNT_BY_CAT.cumple_infantil,
+      onClick: () => setSelected("cumple_infantil"),
+    },
+    {
+      src: "https://images.unsplash.com/photo-1464349095431-e9a21285b5f3?auto=format&fit=crop&w=600&h=900&q=80",
+      alt: "Decoración cumpleaños adulto",
+      label: "Cumple adulto",
+      count: COUNT_BY_CAT.cumple_adulto,
+      onClick: () => setSelected("cumple_adulto"),
+    },
+    {
+      src: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=600&h=900&q=80",
+      alt: "Decoración baby shower",
+      label: "Baby shower",
+      count: COUNT_BY_CAT.baby,
+      onClick: () => setSelected("baby"),
+    },
+    {
+      src: "https://images.unsplash.com/photo-1513151233558-d860c5398176?auto=format&fit=crop&w=600&h=900&q=80",
+      alt: "Decoración bautizo y comunión",
+      label: "Bautizo / Comunión",
+      count: COUNT_BY_CAT.religioso,
+      onClick: () => setSelected("religioso"),
+    },
+    {
+      src: "https://images.unsplash.com/photo-1523580494863-6f3031224c94?auto=format&fit=crop&w=600&h=900&q=80",
+      alt: "Decoración graduación",
+      label: "Grado",
+      count: COUNT_BY_CAT.grado,
+      onClick: () => setSelected("grado"),
+    },
+    {
+      src: "https://images.unsplash.com/photo-1519225421980-715cb0215aed?auto=format&fit=crop&w=600&h=900&q=80",
+      alt: "Decoración romántica",
+      label: "Romántico",
+      count: COUNT_BY_CAT.romantico,
+      onClick: () => setSelected("romantico"),
+    },
+    {
+      src: "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&w=600&h=900&q=80",
+      alt: "Decoración empresarial",
+      label: "Empresarial",
+      count: COUNT_BY_CAT.empresarial,
+      onClick: () => setSelected("empresarial"),
+    },
+    {
+      src: "https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?auto=format&fit=crop&w=600&h=900&q=80",
+      alt: "Decoración temática especial",
+      label: "Especial",
+      count: COUNT_BY_CAT.especial,
+      onClick: () => setSelected("especial"),
+    },
+  ];
+}
 
 export function CategoriasNavegables() {
   const [selected, setSelected] = React.useState<Categoria | null>(null);
+  const [isDesktop, setIsDesktop] = React.useState(true);
   const { open } = useQuiz();
   const reduced = useReducedMotion();
   const mounted = useHasMounted();
-  const desktop = useIsDesktop();
   const enableMotion = mounted && !reduced;
-  const gridRef = React.useRef<HTMLDivElement>(null);
 
-  // GSAP entrance stagger sobre las 8 cards de categoría
-  useGSAP(
-    () => {
-      if (!enableMotion || !gridRef.current) return;
-      if (selected !== null) return; // solo en modo default
+  // Detect viewport. Default true así la galería renderiza en SSR y desktop
+  // sin un flash de mobile fallback. Mobile se aplica solo cuando window
+  // confirma viewport < 768px.
+  React.useEffect(() => {
+    const check = () => setIsDesktop(window.innerWidth >= 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
 
-      gsap.from(".bb-cat-card", {
-        y: 50,
-        opacity: 0,
-        duration: 0.7,
-        stagger: 0.08,
-        ease: "power3.out",
-        scrollTrigger: {
-          trigger: gridRef.current,
-          start: "top 75%",
-          toggleActions: "play none none reverse",
-        },
-      });
-    },
-    { scope: gridRef, dependencies: [enableMotion, selected] }
-  );
+  const items = React.useMemo(() => buildItems(setSelected), []);
 
   const codigosDeCategoria = React.useMemo(
     () => (selected ? CODIGOS_DEC.filter((c) => c.categoria === selected) : []),
@@ -108,15 +134,6 @@ export function CategoriasNavegables() {
   };
 
   const handleBack = () => setSelected(null);
-
-  // Items mapeados para ImageGallery / MobileGallery
-  const galleryItems: ImageGalleryItem[] = CATEGORIAS_ORDER.map((cat) => ({
-    src: REP_IMG_BY_CAT[cat],
-    alt: `Decoración categoría ${CATEGORIA_LABEL[cat]}`,
-    label: CATEGORIA_LABEL[cat],
-    count: COUNT_BY_CAT[cat],
-    onClick: () => setSelected(cat),
-  }));
 
   return (
     <section id="categorias" className="bg-bb-white py-20 md:py-28">
@@ -138,17 +155,16 @@ export function CategoriasNavegables() {
           {selected === null ? (
             <motion.div
               key="categorias"
-              ref={gridRef}
               initial={enableMotion ? { opacity: 0 } : false}
               animate={{ opacity: 1 }}
               exit={enableMotion ? { opacity: 0, scale: 0.95 } : undefined}
               transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
               className="mt-12"
             >
-              {desktop ? (
-                <ImageGallery items={galleryItems} itemClassName="bb-cat-card" />
+              {isDesktop ? (
+                <ImageGallery items={items} />
               ) : (
-                <MobileGallery items={galleryItems} />
+                <MobileGrid items={items} />
               )}
             </motion.div>
           ) : (
@@ -160,7 +176,6 @@ export function CategoriasNavegables() {
               transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
               className="mt-12"
             >
-              {/* Header sticky con back + categoría seleccionada */}
               <div className="sticky top-0 z-20 -mx-6 mb-6 flex flex-wrap items-center gap-3 border-b border-bb-pink-soft bg-bb-white/90 px-6 py-4 backdrop-blur-lg md:gap-4">
                 <button
                   type="button"
@@ -207,34 +222,33 @@ export function CategoriasNavegables() {
 }
 
 /* ──────────────────────────────────────────────────────────────────
-   Mobile fallback: scroll-snap horizontal con cards 240×320
+   Mobile fallback: grid 2 cols con cards simples
    ────────────────────────────────────────────────────────────────── */
-function MobileGallery({ items }: { items: ImageGalleryItem[] }) {
+function MobileGrid({ items }: { items: ImageGalleryItem[] }) {
   return (
-    <div className="-mx-6 flex snap-x snap-mandatory gap-3 overflow-x-auto px-6 pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+    <div className="grid grid-cols-2 gap-3 px-4">
       {items.map((item, idx) => (
         <button
           key={idx}
           onClick={item.onClick}
           type="button"
           aria-label={`Explorar categoría ${item.label}`}
-          className="bb-cat-card relative h-[320px] w-[240px] shrink-0 snap-start overflow-hidden rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-bb-pink focus-visible:ring-offset-2"
+          className="relative aspect-[3/4] overflow-hidden rounded-2xl cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-bb-pink focus-visible:ring-offset-2"
         >
-          <Image
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
             src={item.src}
             alt={item.alt}
-            fill
-            sizes="240px"
-            className="object-cover"
-            unoptimized
+            className="absolute inset-0 h-full w-full object-cover"
+            loading="lazy"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-bb-purple/95 via-bb-purple/30 to-transparent" />
-          <div className="absolute inset-x-0 bottom-0 p-4">
-            <h3 className="text-xl font-extrabold text-white leading-tight">
+          <div className="absolute inset-0 bg-gradient-to-t from-bb-purple/95 via-bb-purple/40 to-transparent" />
+          <div className="absolute inset-x-0 bottom-0 p-3">
+            <h3 className="text-base font-extrabold leading-tight text-white">
               {item.label}
             </h3>
             {item.count !== undefined && (
-              <p className="mt-1 text-sm font-semibold text-bb-lime">
+              <p className="text-xs font-bold text-bb-lime">
                 {item.count} códigos
               </p>
             )}
