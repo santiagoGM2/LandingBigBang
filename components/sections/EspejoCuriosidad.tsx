@@ -6,7 +6,6 @@ import { useReducedMotion } from "framer-motion";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { Quote } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { useQuiz } from "@/components/quiz/QuizProvider";
@@ -24,6 +23,8 @@ interface Scene {
   num: string;
   img: { id: string; alt: string };
   text: React.ReactNode;
+  /** Atmosphere overlay específica de la escena */
+  atmosphere?: string;
   cta?: { label: string; onClick: () => void };
 }
 
@@ -58,6 +59,9 @@ export function EspejoCuriosidad() {
           <span className="text-bb-lime">el impacto visual</span> de un momento inesperado.
         </p>
       ),
+      // Escena 2: bb-pink suave irradiando del centro
+      atmosphere:
+        "radial-gradient(60% 60% at 50% 50%, rgba(233,30,140,0.15) 0%, transparent 70%)",
     },
     {
       num: "03",
@@ -71,6 +75,9 @@ export function EspejoCuriosidad() {
           <span className="text-bb-lime">anfitrión inolvidable</span>.
         </p>
       ),
+      // Escena 3: bb-lime irradiando de abajo
+      atmosphere:
+        "radial-gradient(70% 60% at 50% 100%, rgba(125,199,32,0.15) 0%, transparent 70%)",
       cta: { label: "Quiero ese nivel", onClick: () => open() },
     },
   ];
@@ -145,22 +152,24 @@ function HorizontalEspejo({ scenes }: { scenes: Scene[] }) {
   const sectionRef = React.useRef<HTMLElement>(null);
   const trackRef = React.useRef<HTMLDivElement>(null);
   const progressRef = React.useRef<HTMLDivElement>(null);
+  const transitionOverlayRef = React.useRef<HTMLDivElement>(null);
 
   useGSAP(
     () => {
       if (!sectionRef.current || !trackRef.current) return;
       if (typeof window === "undefined") return;
-      if (window.innerWidth < 768) return; // mobile usa StaticEspejo via media query check abajo
+      if (window.innerWidth < 768) return;
 
       const shift = (scenes.length - 1) * 100; // 200% para 3 escenas
+      const sceneCount = scenes.length;
 
-      gsap.to(trackRef.current, {
-        xPercent: -shift,
-        ease: "none",
+      // Timeline principal — duration 3 (1 por escena) para que las posiciones
+      // absolutas tipo 0.95/1.10 caigan justo en los cruces.
+      const tl = gsap.timeline({
         scrollTrigger: {
           trigger: sectionRef.current,
           start: "top top",
-          end: "+=400%",
+          end: "+=280%",
           scrub: 1,
           pin: true,
           anticipatePin: 1,
@@ -172,21 +181,83 @@ function HorizontalEspejo({ scenes }: { scenes: Scene[] }) {
         },
       });
 
-      // Parallax interno sutil por imagen
+      // Movimiento horizontal del track
+      tl.to(
+        trackRef.current,
+        { xPercent: -shift, duration: sceneCount, ease: "none" },
+        0
+      );
+
+      // Fade-out de toda la sección en los últimos 10% del timeline
+      tl.to(
+        sectionRef.current,
+        { opacity: 0, duration: 0.3, ease: "power1.in" },
+        ">-0.3"
+      );
+
+      // Flash transición entre escenas 1→2 y 2→3
+      if (transitionOverlayRef.current) {
+        tl.to(
+          transitionOverlayRef.current,
+          { opacity: 0.6, duration: 0.15, ease: "power2.in" },
+          0.95
+        )
+          .to(
+            transitionOverlayRef.current,
+            { opacity: 0, duration: 0.15, ease: "power2.out" },
+            1.1
+          )
+          .to(
+            transitionOverlayRef.current,
+            { opacity: 0.6, duration: 0.15, ease: "power2.in" },
+            1.95
+          )
+          .to(
+            transitionOverlayRef.current,
+            { opacity: 0, duration: 0.15, ease: "power2.out" },
+            2.1
+          );
+      }
+
+      // RotateY sutil en cada imagen durante el progreso de su escena
       const images = sectionRef.current.querySelectorAll<HTMLElement>(
         ".bb-espejo-scene-img"
       );
       images.forEach((img, i) => {
         gsap.fromTo(
           img,
-          { y: 20 },
+          { rotateY: -8, y: 20 },
           {
+            rotateY: 8,
             y: -20,
             ease: "none",
             scrollTrigger: {
               trigger: sectionRef.current,
-              start: `top+=${(i / scenes.length) * 400}% top`,
-              end: `top+=${((i + 1) / scenes.length) * 400}% top`,
+              start: `top+=${(i / sceneCount) * 280}% top`,
+              end: `top+=${((i + 1) / sceneCount) * 280}% top`,
+              scrub: 1,
+            },
+          }
+        );
+      });
+
+      // Entrada de cada número decorativo: scale 0.5 → 1, rotateZ -15° → 0
+      const numbers = sectionRef.current.querySelectorAll<HTMLElement>(
+        ".bb-espejo-scene-num"
+      );
+      numbers.forEach((num, i) => {
+        gsap.fromTo(
+          num,
+          { scale: 0.5, rotateZ: -15, opacity: 0.3 },
+          {
+            scale: 1,
+            rotateZ: 0,
+            opacity: 1,
+            ease: "back.out(1.4)",
+            scrollTrigger: {
+              trigger: sectionRef.current,
+              start: `top+=${(i / sceneCount) * 280}% top`,
+              end: `top+=${(i / sceneCount + 0.3 / sceneCount) * 280}% top`,
               scrub: 1,
             },
           }
@@ -196,7 +267,7 @@ function HorizontalEspejo({ scenes }: { scenes: Scene[] }) {
     { scope: sectionRef, dependencies: [scenes.length] }
   );
 
-  // Mobile breakpoint guard via JS — si entra mobile renderiza StaticEspejo
+  // Mobile guard: si entra mobile renderiza StaticEspejo
   const [isMobile, setIsMobile] = React.useState(false);
   React.useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 768);
@@ -227,48 +298,52 @@ function HorizontalEspejo({ scenes }: { scenes: Scene[] }) {
         />
       </div>
 
+      {/* Overlay de transición — flash purple entre escenas */}
+      <div
+        ref={transitionOverlayRef}
+        aria-hidden
+        className="pointer-events-none absolute inset-0 z-40 bg-bb-purple"
+        style={{ opacity: 0 }}
+      />
+
       {/* Track horizontal con las 3 escenas */}
       <div
         ref={trackRef}
         className="flex h-screen will-change-transform"
         style={{ width: `${scenes.length * 100}vw` }}
       >
-        {scenes.map((s, i) => (
-          <SceneHorizontal key={s.num} scene={s} isFirst={i === 0} />
+        {scenes.map((s) => (
+          <SceneHorizontal key={s.num} scene={s} />
         ))}
       </div>
     </section>
   );
 }
 
-function SceneHorizontal({
-  scene,
-  isFirst,
-}: {
-  scene: Scene;
-  isFirst: boolean;
-}) {
+function SceneHorizontal({ scene }: { scene: Scene }) {
   return (
     <div className="relative flex h-screen w-screen items-center px-6 md:px-16 lg:px-24">
-      {/* Número gigante decorativo */}
+      {/* Atmosphere overlay específico de esta escena */}
+      {scene.atmosphere && (
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 z-0"
+          style={{ background: scene.atmosphere }}
+        />
+      )}
+
+      {/* Número gigante decorativo — animado por GSAP */}
       <span
         aria-hidden
-        className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 select-none font-black leading-none text-bb-pink/15 lg:right-12"
+        className="bb-espejo-scene-num pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 select-none font-black leading-none text-bb-pink/15 lg:right-12 will-change-transform"
         style={{ fontSize: "clamp(12rem, 32vw, 28rem)" }}
       >
         {scene.num}
       </span>
 
       <div className="relative z-10 mx-auto grid w-full max-w-7xl items-center gap-12 md:grid-cols-2">
-        {/* Columna texto */}
+        {/* Columna texto — sin Quote icon (eliminado) */}
         <div className="relative">
-          {isFirst && (
-            <Quote
-              aria-hidden
-              className="pointer-events-none absolute -left-2 -top-16 h-24 w-24 text-bb-pink opacity-90 md:-left-6 md:-top-20 md:h-32 md:w-32"
-              strokeWidth={2.2}
-            />
-          )}
           {scene.text}
           {scene.cta && (
             <div className="mt-9">
@@ -279,13 +354,13 @@ function SceneHorizontal({
           )}
         </div>
 
-        {/* Columna imagen con parallax interno */}
-        <div className="relative justify-self-center">
+        {/* Columna imagen con rotateY animado por GSAP */}
+        <div className="relative justify-self-center" style={{ perspective: "1200px" }}>
           <div
             className="bb-espejo-scene-img relative aspect-[4/5] w-full max-w-md overflow-hidden rounded-3xl bg-gradient-to-br from-bb-pink-soft/20 to-bb-purple-soft/40 will-change-transform"
             style={{
-              transform: "rotateY(6deg) rotateX(-3deg)",
               boxShadow: "0 30px 60px rgba(0,0,0,0.45)",
+              transformStyle: "preserve-3d",
             }}
           >
             <Image

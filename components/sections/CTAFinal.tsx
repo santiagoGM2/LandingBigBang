@@ -8,11 +8,10 @@ import {
   useTransform,
   useReducedMotion,
 } from "framer-motion";
-import { Sparkles, Ribbon } from "lucide-react";
+import { Sparkles } from "lucide-react";
 
 import { BorderBeam } from "@/components/ui/border-beam";
-import { FloatingBalloons } from "@/components/decor/FloatingBalloons";
-import { PartySticker } from "@/components/decor/PartySticker";
+import { BalloonsRain } from "@/components/decor/BalloonsRain";
 import { useQuiz } from "@/components/quiz/QuizProvider";
 import { useHasMounted } from "@/lib/use-has-mounted";
 import { useIsDesktop } from "@/lib/use-media-query";
@@ -92,7 +91,8 @@ export function CTAFinal() {
 
   return (
     <section className="relative overflow-hidden bg-bb-pink py-24 md:py-32 text-white">
-      <FloatingBalloons count={6} mobileCount={2} opacity={0.22} />
+      {/* Lluvia continua de globos cayendo (reemplaza los Ribbons + FloatingBalloons) */}
+      <BalloonsRain count={14} />
 
       {/* Color shift: tinte purpura sutil que pulsa cada 8s */}
       <div
@@ -112,24 +112,6 @@ export function CTAFinal() {
       <div
         aria-hidden
         className="pointer-events-none absolute -bottom-20 -right-16 h-72 w-72 rounded-full bg-bb-purple/40 blur-3xl"
-      />
-
-      {/* Lazos */}
-      <PartySticker
-        icon={Ribbon}
-        size={50}
-        color="#FFFFFF"
-        rotation={-18}
-        delay={0.3}
-        className="absolute left-6 top-1/2 z-10 hidden -translate-y-1/2 md:block lg:left-20"
-      />
-      <PartySticker
-        icon={Ribbon}
-        size={50}
-        color="#FFFFFF"
-        rotation={18}
-        delay={0.5}
-        className="absolute right-6 top-1/2 z-10 hidden -translate-y-1/2 md:block lg:right-20"
       />
 
       <div

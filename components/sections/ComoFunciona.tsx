@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useReducedMotion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -53,14 +53,15 @@ export function ComoFunciona() {
   const mounted = useHasMounted();
   const reduced = useReducedMotion();
   const sectionRef = React.useRef<HTMLDivElement>(null);
+  const enableMotion = mounted && !reduced;
 
   useGSAP(
     () => {
-      if (reduced || !mounted || !sectionRef.current) return;
+      if (!enableMotion || !sectionRef.current) return;
       const isMobile = window.innerWidth < 768;
 
-      // Entrance de cards: 3D en desktop, 2D liviano en mobile
       if (isMobile) {
+        // Mobile: entrance 2D liviano
         gsap.from(".como-card", {
           y: 32,
           opacity: 0,
@@ -73,35 +74,52 @@ export function ComoFunciona() {
             toggleActions: "play none none reverse",
           },
         });
-      } else {
-        gsap.from(".como-card", {
-          rotateY: 60,
-          z: -300,
-          opacity: 0,
-          stagger: 0.22,
-          duration: 1,
-          ease: "power3.out",
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: "top 70%",
-            toggleActions: "play none none reverse",
-          },
-        });
-
-        // SVG path draw scrubbed por scroll
-        gsap.to(".como-path", {
-          strokeDashoffset: 0,
-          ease: "none",
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: "top 75%",
-            end: "bottom 55%",
-            scrub: 1,
-          },
-        });
+        return;
       }
+
+      // Desktop: flip 3D dramático por card con stagger 0.18s
+      gsap.from(".como-card", {
+        rotateY: -90,
+        z: -200,
+        opacity: 0,
+        stagger: 0.18,
+        duration: 1,
+        ease: "power3.out",
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: "top 70%",
+          toggleActions: "play none none reverse",
+        },
+      });
+
+      // Números gigantes detrás: entrada con yPercent y rotate sutil
+      gsap.from(".como-num", {
+        yPercent: 50,
+        opacity: 0,
+        rotate: -8,
+        duration: 0.8,
+        stagger: 0.18,
+        ease: "power2.out",
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: "top 75%",
+          toggleActions: "play none none reverse",
+        },
+      });
+
+      // SVG path draw scrubbed por scroll
+      gsap.to(".como-path", {
+        strokeDashoffset: 0,
+        ease: "none",
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: "top 75%",
+          end: "bottom 55%",
+          scrub: 1,
+        },
+      });
     },
-    { scope: sectionRef, dependencies: [mounted, reduced] }
+    { scope: sectionRef, dependencies: [enableMotion] }
   );
 
   return (
@@ -121,7 +139,6 @@ export function ComoFunciona() {
           className="relative mt-16"
           style={{ perspective: "1400px" }}
         >
-          {/* Estrella decorativa */}
           <PartySticker
             icon={Star}
             size={44}
@@ -131,7 +148,7 @@ export function ComoFunciona() {
             className="absolute right-12 -top-6 z-30 hidden lg:block"
           />
 
-          {/* SVG curve animado conectando los 3 pasos (solo desktop) */}
+          {/* SVG curve animado conectando los 3 pasos */}
           <svg
             aria-hidden
             viewBox="0 0 100 80"
@@ -156,30 +173,39 @@ export function ComoFunciona() {
           <div className="relative z-10 flex flex-col gap-10 md:gap-16">
             {PASOS.map((p, i) => {
               const Icon = p.icon;
-              const isOdd = i % 2 === 1; // 0 izq, 1 der, 2 izq
+              const isOdd = i % 2 === 1;
               return (
-                <div
+                <motion.div
                   key={p.num}
+                  whileHover={enableMotion ? { y: -8, scale: 1.02 } : undefined}
+                  transition={{ type: "spring", stiffness: 280, damping: 22 }}
                   className={cn(
                     "como-card w-full will-change-transform md:w-[48%]",
                     isOdd ? "md:self-end" : "md:self-start"
                   )}
                   style={{ transformStyle: "preserve-3d" }}
                 >
-                  <div className="relative overflow-hidden rounded-3xl bg-white p-8 md:p-10 shadow-bb-soft transition-shadow duration-300 hover:shadow-bb-pink">
-                    {/* Número gigante con depth real */}
+                  <div
+                    className={cn(
+                      "group relative overflow-hidden rounded-3xl p-8 md:p-10",
+                      "bg-gradient-to-br from-white via-white to-bb-pink/5",
+                      "border border-bb-pink/10",
+                      "shadow-[0_18px_40px_-15px_rgba(61,26,110,0.18)]",
+                      "transition-shadow duration-300",
+                      "hover:shadow-[0_30px_60px_-15px_rgba(233,30,140,0.35)]"
+                    )}
+                  >
+                    {/* Número gigante con depth real (animado por GSAP) */}
                     <span
                       aria-hidden
-                      className="pointer-events-none absolute -right-3 -top-12 select-none text-[10rem] font-black leading-none text-bb-pink-soft"
-                      style={{
-                        transform: "translateZ(-80px)",
-                      }}
+                      className="como-num pointer-events-none absolute -right-3 -top-12 select-none text-[10rem] font-black leading-none text-bb-pink-soft"
+                      style={{ transform: "translateZ(-80px)" }}
                     >
                       {p.num}
                     </span>
 
                     <div className="relative">
-                      <div className="grid h-24 w-24 place-items-center rounded-full bg-bb-lime-soft text-bb-purple">
+                      <div className="grid h-24 w-24 place-items-center rounded-full bg-bb-lime-soft text-bb-purple transition-transform duration-300 group-hover:rotate-[8deg]">
                         <Icon className="h-12 w-12" aria-hidden strokeWidth={2} />
                       </div>
                       <h3 className="mt-7 text-xl md:text-2xl font-extrabold text-bb-purple">
@@ -190,7 +216,7 @@ export function ComoFunciona() {
                       </p>
                     </div>
                   </div>
-                </div>
+                </motion.div>
               );
             })}
           </div>

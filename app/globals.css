@@ -157,6 +157,14 @@ body {
 }
 .animate-bb-cta-tint { animation: bb-cta-tint 8s ease-in-out infinite; }
 
+/* Lluvia de globos cayendo continuo (BalloonsRain en CTA Final) */
+@keyframes bb-balloon-fall {
+  0%   { transform: translateY(-150px) rotate(-3deg); opacity: 0; }
+  10%  { opacity: 0.55; }
+  90%  { opacity: 0.55; }
+  100% { transform: translateY(calc(100vh + 150px)) rotate(3deg); opacity: 0; }
+}
+
 /* Loading screen logo: scale 0 + rotateY -360 → final, 1.2s con overshoot */
 @keyframes bb-loading-logo {
   from { opacity: 0; transform: scale(0) rotateY(-360deg); }

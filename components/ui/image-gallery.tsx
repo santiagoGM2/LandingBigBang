@@ -45,17 +45,18 @@ export function ImageGallery({ items, className }: ImageGalleryProps) {
           aria-label={`Explorar categoría ${item.label}`}
           className={cn(
             "bb-cat-card group relative overflow-hidden rounded-2xl cursor-pointer",
-            "transition-[flex] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]",
+            "flex-1 min-w-0",
+            "transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]",
             "hover:flex-[5] focus-visible:flex-[5]",
             "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-bb-pink focus-visible:ring-offset-2"
           )}
-          style={{ flex: "1 1 0", minWidth: 0, height: "480px" }}
+          style={{ height: "480px" }}
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={item.src}
             alt={item.alt}
-            className="absolute inset-0 h-full w-full object-cover object-center transition-transform duration-700 group-hover:scale-105"
+            className="absolute inset-0 h-full w-full object-cover object-center transition-transform duration-700 group-hover:scale-110 group-focus-visible:scale-110"
             loading="lazy"
           />
 
