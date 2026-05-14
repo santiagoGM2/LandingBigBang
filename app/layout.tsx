@@ -59,7 +59,7 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="es-CO" className={`${nunito.variable} h-full antialiased`}>
-      <body className="min-h-full bg-bb-white text-bb-text font-sans">
+      <body className="min-h-full overflow-x-hidden bg-bb-white text-bb-text font-sans">
         <a href="#main" className="skip-link">
           Ir al contenido
         </a>

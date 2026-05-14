@@ -70,7 +70,7 @@ export function FAQ() {
             hidden: {},
             visible: { transition: { staggerChildren: 0.06 } },
           }}
-          className="mt-10 rounded-3xl bg-bb-gray px-6 md:px-8 shadow-bb-soft"
+          className="mt-10 rounded-3xl bg-bb-gray px-4 sm:px-6 md:px-8 shadow-bb-soft"
         >
           <Accordion type="single" collapsible>
             {FAQS.map((f, i) => (

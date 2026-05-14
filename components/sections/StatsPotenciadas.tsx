@@ -168,7 +168,7 @@ export function StatsPotenciadas() {
 
           <div
             ref={gridRef}
-            className="relative z-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4"
+            className="relative z-10 grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-4"
             style={{ perspective: "1500px" }}
           >
             {STATS.map((s, i) => (
@@ -239,7 +239,7 @@ function StatCard({ stat, index, reduced }: { stat: Stat; index: number; reduced
           : { transformStyle: "preserve-3d" }
       }
       className={cn(
-        "bb-stat-card group relative isolate rounded-3xl border border-bb-pink/10 p-8",
+        "bb-stat-card group relative isolate rounded-3xl border border-bb-pink/10 p-6 sm:p-8",
         "bg-gradient-to-br from-white via-white to-bb-pink/5",
         "shadow-[0_20px_50px_-12px_rgba(61,26,110,0.18)]",
         "hover:shadow-[0_35px_80px_-15px_rgba(61,26,110,0.35)]",
@@ -283,7 +283,7 @@ function StatCard({ stat, index, reduced }: { stat: Stat; index: number; reduced
 
       {typeof stat.value === "number" && (
         <div
-          className="relative mt-5 text-5xl font-extrabold leading-none text-bb-purple md:text-6xl"
+          className="relative mt-5 text-4xl font-extrabold leading-none text-bb-purple sm:text-5xl md:text-6xl"
           style={{ transform: "translateZ(40px)" }}
         >
           <NumberTicker

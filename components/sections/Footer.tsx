@@ -97,9 +97,9 @@ export function Footer() {
             hidden: {},
             visible: { transition: { staggerChildren: 0.06, delayChildren: 0.05 } },
           }}
-          className="grid gap-10 md:grid-cols-4"
+          className="grid grid-cols-2 gap-8 md:grid-cols-4 md:gap-10"
         >
-          <motion.div variants={columnVariant} className="md:col-span-2">
+          <motion.div variants={columnVariant} className="col-span-2 md:col-span-2">
             <BigBangLogo variant="footer" className="h-20" />
             <p className="mt-5 max-w-md text-white/70 leading-relaxed">
               Decoración profesional de fiestas en Cali. Convertimos fechas en

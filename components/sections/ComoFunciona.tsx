@@ -198,7 +198,7 @@ export function ComoFunciona() {
                     {/* Número gigante con depth real (animado por GSAP) */}
                     <span
                       aria-hidden
-                      className="como-num pointer-events-none absolute -right-3 -top-12 select-none text-[10rem] font-black leading-none text-bb-pink-soft"
+                      className="como-num pointer-events-none absolute -right-3 -top-12 select-none text-[6rem] sm:text-[8rem] md:text-[10rem] font-black leading-none text-bb-pink-soft"
                       style={{ transform: "translateZ(-80px)" }}
                     >
                       {p.num}

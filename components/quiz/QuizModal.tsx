@@ -109,17 +109,37 @@ function categoriasFromContext(
   aQuien?: string,
   ocasion?: string
 ): Categoria[] {
+  // Ocasión es el predictor más fuerte
   if (ocasion === "Nuestro aniversario") return ["romantico"];
   if (ocasion === "Está esperando un bebé") return ["baby"];
   if (ocasion === "Se acaba de graduar") return ["grado"];
-  if (ocasion === "Otra ocasión especial" || ocasion === "Sorpresa sin motivo")
-    return ["especial", "romantico", "cumple_adulto"];
+
   if (ocasion === "Su cumpleaños") {
     if (aQuien === "A mi hijo/hija") return ["cumple_infantil"];
     if (aQuien === "A mi pareja") return ["cumple_adulto", "romantico"];
+    if (aQuien === "A mi mamá / papá")
+      return ["cumple_adulto", "especial"];
+    if (aQuien === "A alguien especial")
+      return ["cumple_adulto", "especial"];
     return ["cumple_adulto", "cumple_infantil"];
   }
-  return ["cumple_adulto", "especial", "romantico"];
+
+  if (ocasion === "Sorpresa sin motivo") {
+    if (aQuien === "A mi pareja") return ["romantico", "especial"];
+    if (aQuien === "A mi hijo/hija") return ["cumple_infantil", "especial"];
+    return ["especial", "romantico", "cumple_adulto"];
+  }
+
+  if (ocasion === "Otra ocasión especial") {
+    return ["especial", "romantico", "cumple_adulto"];
+  }
+
+  // Si solo conocemos aQuien (sin ocasion)
+  if (aQuien === "A mi hijo/hija") return ["cumple_infantil", "especial"];
+  if (aQuien === "A mi pareja") return ["romantico", "especial"];
+
+  // Fallback genérico: sample diverso para no morir vacío en ningún edge case
+  return ["especial", "cumple_adulto", "romantico"];
 }
 
 function pickGallery(
@@ -129,8 +149,11 @@ function pickGallery(
 ): CodigoDec[] {
   const cats = categoriasFromContext(aQuien, ocasion);
   const matches = CODIGOS_DEC.filter((c) => cats.includes(c.categoria));
-  const pool = matches.length >= limit ? matches : CODIGOS_DEC;
-  return pool.slice(0, limit);
+  // Si las categorías no llenan el grid, completar con un sample diverso del
+  // resto del catálogo en lugar de devolver "vacío" o repetir las mismas fotos.
+  if (matches.length >= limit) return matches.slice(0, limit);
+  const fillers = CODIGOS_DEC.filter((c) => !cats.includes(c.categoria));
+  return [...matches, ...fillers].slice(0, limit);
 }
 
 /* ─── Definición declarativa de los 7 pasos ─────────────────── */
@@ -169,8 +192,7 @@ const ALL_STEPS: StepDef[] = [
   },
   {
     key: "pausa_visual",
-    title:
-      "Fotos reales según el tipo de persona y ocasión que elegiste. Solo para que tu cerebro empiece a imaginar.",
+    title: "Fotos reales que hemos creado para personas como esa.",
     isValid: () => true,
     progressIndex: 2,
   },
@@ -491,7 +513,11 @@ export function QuizModal({
         );
       case "pausa_visual":
         return (
-          <PausaVisual a={answers.a_quien} o={answers.ocasion} />
+          <PausaVisual
+            a={answers.a_quien}
+            o={answers.ocasion}
+            onContinuar={goNext}
+          />
         );
       case "intencion":
         return (
@@ -730,28 +756,64 @@ function IconGrid({
   );
 }
 
-function PausaVisual({ a, o }: { a?: string; o?: string }) {
+function PausaVisual({
+  a,
+  o,
+  onContinuar,
+}: {
+  a?: string;
+  o?: string;
+  onContinuar: () => void;
+}) {
   const gallery = React.useMemo(() => pickGallery(a, o, 6), [a, o]);
+  const refAQuien = a
+    ? a
+        .replace(/^A mi /, "")
+        .replace(/^A /, "")
+    : "esa persona";
+
   return (
-    <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
-      {gallery.map((c) => (
-        <div
-          key={c.codigo}
-          className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-gradient-to-br from-bb-pink-soft to-bb-purple-soft/30 shadow-bb-soft"
-        >
-          <Image
-            src={c.img}
-            alt={c.titulo}
-            fill
-            sizes="(min-width:768px) 33vw, 50vw"
-            className="object-cover"
-            unoptimized
-          />
-          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-bb-purple/95 to-transparent p-2">
-            <p className="text-xs font-bold text-white">{c.titulo}</p>
+    <div className="space-y-5">
+      <p className="rounded-2xl bg-bb-pink-soft/60 px-4 py-3 text-sm text-bb-purple/85 leading-snug">
+        Mientras procesamos, mirá lo que hemos creado para personas como{" "}
+        <strong>{refAQuien}</strong>. Click en <strong>Continuar</strong> cuando
+        estés listo.
+      </p>
+
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
+        {gallery.map((c) => (
+          <div
+            key={c.codigo}
+            className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-gradient-to-br from-bb-pink-soft to-bb-purple-soft/30 shadow-bb-soft"
+          >
+            <Image
+              src={c.img}
+              alt={c.titulo}
+              fill
+              sizes="(min-width:768px) 33vw, 50vw"
+              className="object-cover"
+              unoptimized
+            />
+            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-bb-purple/95 to-transparent p-2">
+              <p className="text-xs font-bold text-white">{c.titulo}</p>
+            </div>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
+
+      <button
+        type="button"
+        onClick={onContinuar}
+        className={cn(
+          "group w-full rounded-2xl bg-bb-purple px-6 py-4 text-base font-bold text-white",
+          "shadow-bb-soft transition-all hover:bg-bb-pink hover:-translate-y-0.5",
+          "focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-bb-pink/30",
+          "inline-flex items-center justify-center gap-2"
+        )}
+      >
+        Continuar al paso 3
+        <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+      </button>
     </div>
   );
 }

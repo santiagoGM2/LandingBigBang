@@ -99,13 +99,13 @@ export function Hero() {
         </span>
 
         {/* Title — color bb-text con keyword en bb-pink */}
-        <h1 className="mt-7 max-w-5xl text-3xl font-extrabold leading-[1.1] text-bb-text md:text-5xl lg:text-6xl">
+        <h1 className="mt-7 max-w-5xl text-[26px] sm:text-3xl md:text-5xl lg:text-6xl font-extrabold leading-[1.1] text-bb-text">
           ¿Por qué algunas personas se convierten en el{" "}
           <span className="text-bb-pink">héroe de la familia</span> con una sola
           sorpresa… y otras gastan el doble y nadie recuerda nada?
         </h1>
 
-        <p className="mt-6 max-w-2xl text-lg leading-relaxed text-bb-text/70 md:text-xl">
+        <p className="mt-6 max-w-2xl text-base sm:text-lg leading-relaxed text-bb-text/70 md:text-xl">
           {DESCRIPTION}
         </p>
 
