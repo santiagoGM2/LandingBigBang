@@ -26,30 +26,15 @@ interface GhlPayloadNuevo {
  * todavía esperan los nombres de la v1 del funnel. Se concatenan al payload
  * nuevo para que durante la transición ambos sets de workflows reciban data
  * correctamente cableada.
- *
- * Phase O.1.2: doble emisión de keys legacy para robustez. El custom field
- * en GHL podría llamarse `tipo_evento` o `tipo_de_evento` (idem para los
- * otros 5 campos legacy). Enviamos ambas variantes para que el mapping
- * interno del workflow tome cualquiera de las dos. Cuando se confirme la
- * key correcta, se elimina la otra.
- *
- * TODO: Phase O.2 — consolidar a una sola key cuando GHL workflows estén 100% migrados.
+ * TODO: Phase O.2 — eliminar campos compat cuando GHL workflows estén 100% migrados.
  */
 interface GhlPayloadCompat extends GhlPayloadNuevo {
-  // Variantes "snake_case" estándar
   tipo_evento: string;
   para_quien: string;
   tiene_tematica: string;
   tematica_detalle: string;
   fecha_evento: string;
   presupuesto: string;
-
-  // Variantes alternativas que GHL podría estar usando como key real del field
-  tipo_de_evento: string;
-  para_quién: string;
-  tiene_temática: string;
-  temática_detalle: string;
-  fecha_del_evento: string;
 }
 
 function buildResumen(a: QuizAnswers): string {
@@ -146,31 +131,18 @@ export async function POST(req: Request) {
             ? "Confio en ustedes"
             : "";
 
-  const tematicaDetalleCompat =
-    payloadNuevo.codigo_elegido ||
-    payloadNuevo.vision_descripcion ||
-    payloadNuevo.personalizacion ||
-    "";
-  const fechaEventoCompat =
-    payloadNuevo.fecha_exacta || payloadNuevo.fecha_estimada;
-
   const payload: GhlPayloadCompat = {
     ...payloadNuevo,
-
-    // Variantes snake_case
     tipo_evento: payloadNuevo.ocasion,
     para_quien: payloadNuevo.a_quien,
     tiene_tematica: tieneTematica,
-    tematica_detalle: tematicaDetalleCompat,
-    fecha_evento: fechaEventoCompat,
+    tematica_detalle:
+      payloadNuevo.codigo_elegido ||
+      payloadNuevo.vision_descripcion ||
+      payloadNuevo.personalizacion ||
+      "",
+    fecha_evento: payloadNuevo.fecha_exacta || payloadNuevo.fecha_estimada,
     presupuesto: "",
-
-    // Variantes alternativas (con "de" / con acentos / nombres alternativos)
-    tipo_de_evento: payloadNuevo.ocasion,
-    para_quién: payloadNuevo.a_quien,
-    tiene_temática: tieneTematica,
-    temática_detalle: tematicaDetalleCompat,
-    fecha_del_evento: fechaEventoCompat,
   };
 
   console.info("[/api/lead] inbound", {
@@ -189,10 +161,6 @@ export async function POST(req: Request) {
       tipo_evento: payload.tipo_evento,
       para_quien: payload.para_quien,
       tiene_tematica: payload.tiene_tematica,
-      // Compat alt (Phase O.1.2)
-      tipo_de_evento: payload.tipo_de_evento,
-      para_quién: payload.para_quién,
-      tiene_temática: payload.tiene_temática,
       resumen_quiz_len: payload.resumen_quiz.length,
     },
   });
