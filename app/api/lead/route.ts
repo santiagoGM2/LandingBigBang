@@ -3,7 +3,7 @@ import type { QuizAnswers } from "@/lib/ghl";
 
 const GHL_WEBHOOK_URL = process.env.GHL_WEBHOOK_URL || "";
 
-interface GhlPayload {
+interface GhlPayloadNuevo {
   nombre: string;
   telefono: string;
   email: string;
@@ -19,6 +19,22 @@ interface GhlPayload {
   fecha_exacta: string;
   resumen_quiz: string;
   source: "landing_big_bang_funnel_v2";
+}
+
+/**
+ * Campos legacy (Phase O.1): mapping de los workflows viejos de GHL que
+ * todavía esperan los nombres de la v1 del funnel. Se concatenan al payload
+ * nuevo para que durante la transición ambos sets de workflows reciban data
+ * correctamente cableada.
+ * TODO: Phase O.2 — eliminar campos compat cuando GHL workflows estén 100% migrados.
+ */
+interface GhlPayloadCompat extends GhlPayloadNuevo {
+  tipo_evento: string;
+  para_quien: string;
+  tiene_tematica: string;
+  tematica_detalle: string;
+  fecha_evento: string;
+  presupuesto: string;
 }
 
 function buildResumen(a: QuizAnswers): string {
@@ -82,7 +98,7 @@ export async function POST(req: Request) {
     );
   }
 
-  const payload: GhlPayload = {
+  const payloadNuevo: GhlPayloadNuevo = {
     nombre: answers.contacto.nombre.trim(),
     telefono: answers.contacto.telefono.trim(),
     email: answers.contacto.email?.trim() || "",
@@ -100,6 +116,35 @@ export async function POST(req: Request) {
     source: "landing_big_bang_funnel_v2",
   };
 
+  // Phase O.1: mapping a campos viejos para mantener GHL funcionando durante
+  // transición. Los workflows v1 leen tipo_evento/para_quien/etc; los v2 leen
+  // los campos directos. Ambos sets viajan en el mismo POST.
+  // TODO: Phase O.2 — eliminar campos compat cuando GHL workflows estén 100% migrados.
+  const tieneTematica =
+    answers.intencion === "personalizar"
+      ? "Si, ya se que quiero"
+      : answers.intencion === "cero"
+        ? "No, quiero empezar desde cero"
+        : answers.intencion === "asesoria"
+          ? "Necesito asesoria"
+          : answers.intencion === "sorprendeme"
+            ? "Confio en ustedes"
+            : "";
+
+  const payload: GhlPayloadCompat = {
+    ...payloadNuevo,
+    tipo_evento: payloadNuevo.ocasion,
+    para_quien: payloadNuevo.a_quien,
+    tiene_tematica: tieneTematica,
+    tematica_detalle:
+      payloadNuevo.codigo_elegido ||
+      payloadNuevo.vision_descripcion ||
+      payloadNuevo.personalizacion ||
+      "",
+    fecha_evento: payloadNuevo.fecha_exacta || payloadNuevo.fecha_estimada,
+    presupuesto: "",
+  };
+
   console.info("[/api/lead] inbound", {
     intencion: answers.intencion,
     tipo_envio: answers.tipo_envio || "completo",
@@ -112,6 +157,10 @@ export async function POST(req: Request) {
       intencion: payload.intencion,
       codigo_elegido: payload.codigo_elegido,
       fecha_estimada: payload.fecha_estimada,
+      // Compat (Phase O.1)
+      tipo_evento: payload.tipo_evento,
+      para_quien: payload.para_quien,
+      tiene_tematica: payload.tiene_tematica,
       resumen_quiz_len: payload.resumen_quiz.length,
     },
   });
