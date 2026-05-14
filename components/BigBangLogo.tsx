@@ -15,11 +15,11 @@ interface Props {
   priority?: boolean;
 }
 
-// Phase P: URL nueva del logo del cliente. CDN primario, fallback local si el
-// CDN falla (caching o downtime). El dominio está whitelisted en next.config.
+// Logo local en /public es la fuente primaria. El CDN del cliente queda como
+// red de seguridad si el archivo local se borra accidentalmente del bundle.
+const LOGO_LOCAL = "/logo-big-bang.png";
 const LOGO_CDN =
   "https://assets.cdn.filesafe.space/cmpzRjKz3Lb2QJBXQTJw/media/6a0631e2e92818f121b6044a.png";
-const LOGO_LOCAL = "/logo-big-bang.png";
 const INTRINSIC_W = 382;
 const INTRINSIC_H = 217;
 
@@ -29,8 +29,8 @@ const INTRINSIC_H = 217;
  *  - footer:  el mismo PNG pero invertido a blanco vía CSS filter
  *  - compact: igual al default pero más chico para navs y FABs
  *
- * Estrategia de carga: intenta el CDN del cliente primero; si falla, cae al
- * PNG local en /public como red de seguridad.
+ * Estrategia de carga: intenta el archivo local de /public primero; si por
+ * algún motivo falla, cae al CDN del cliente.
  */
 export function BigBangLogo({
   variant = "default",
@@ -38,7 +38,7 @@ export function BigBangLogo({
   label = "Big Bang Cali",
   priority = false,
 }: Props) {
-  const [src, setSrc] = React.useState<string>(LOGO_CDN);
+  const [src, setSrc] = React.useState<string>(LOGO_LOCAL);
 
   const sizeClass =
     variant === "compact"
@@ -60,7 +60,7 @@ export function BigBangLogo({
       style={invertFilter}
       className={cn("select-none", sizeClass, className)}
       onError={() => {
-        if (src !== LOGO_LOCAL) setSrc(LOGO_LOCAL);
+        if (src !== LOGO_CDN) setSrc(LOGO_CDN);
       }}
     />
   );
