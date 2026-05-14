@@ -75,7 +75,7 @@ export function WhatsAppFAB() {
   }, [mounted]);
 
   return (
-    <div className="fixed bottom-5 right-5 z-50 flex flex-col items-end gap-3 md:bottom-7 md:right-7">
+    <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3 md:bottom-8 md:right-8">
       <AnimatePresence>
         {hintOpen && (
           <motion.div
@@ -112,19 +112,25 @@ export function WhatsAppFAB() {
         whileTap={enableMotion ? { scale: 0.95 } : undefined}
         transition={{ type: "spring", stiffness: 280, damping: 22 }}
         style={{ backgroundColor: WA_GREEN }}
-        className="group relative grid h-16 w-16 place-items-center rounded-full text-white shadow-[0_18px_40px_-12px_rgba(37,211,102,0.55)] md:h-[72px] md:w-[72px]"
+        className="group relative grid h-14 w-14 place-items-center rounded-full text-white shadow-[0_14px_30px_-10px_rgba(37,211,102,0.45)]"
       >
-        {/* Pulse ring continuo (solo cuando enableMotion) */}
+        {/* Pulse ring: late, espera, late, espera. Phase R lo sutilizó para
+            no competir con el contenido en secciones de fondo oscuro. */}
         {enableMotion && (
           <motion.span
             aria-hidden
             style={{ backgroundColor: WA_GREEN }}
             className="absolute inset-0 rounded-full"
-            animate={{ scale: [1, 1.4], opacity: [0.4, 0] }}
-            transition={{ duration: 2, repeat: Infinity, ease: "easeOut" }}
+            animate={{ scale: [1, 1.25], opacity: [0.25, 0] }}
+            transition={{
+              duration: 2.5,
+              repeat: Infinity,
+              ease: "easeOut",
+              repeatDelay: 1.5,
+            }}
           />
         )}
-        <WhatsAppIcon className="relative h-7 w-7 md:h-8 md:w-8" />
+        <WhatsAppIcon className="relative h-6 w-6" />
       </motion.a>
     </div>
   );
