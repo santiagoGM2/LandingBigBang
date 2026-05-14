@@ -26,13 +26,14 @@ const MAGNETIC_RADIUS = 80;
 const MAGNETIC_MAX = 8;
 const TILT_MAX = 4;
 
-// Phase Q.4: video alternativo con foco más sutil. Cadena de fallback —
-// si el primero no carga (CDN caído, CORS, etc) cae al siguiente.
+// Phase Q.1: videos sin foco luminoso central. Cadena de fallback — si el
+// primero no carga (CDN caído, CORS) cae al siguiente. El video #8068291
+// que se usó en Phase Q quedó descartado: tenía un globo claro destacado
+// en primer plano que distraía del texto.
 const VIDEO_SOURCES = [
-  "https://videos.pexels.com/video-files/8068291/8068291-uhd_2560_1440_25fps.mp4",
-  "https://videos.pexels.com/video-files/6963747/6963747-hd_1920_1080_30fps.mp4",
+  "https://videos.pexels.com/video-files/4045222/4045222-hd_1920_1080_25fps.mp4",
   "https://videos.pexels.com/video-files/3209828/3209828-hd_1920_1080_25fps.mp4",
-  "https://cdn.coverr.co/videos/coverr-balloons-rising-in-the-sky-6262/1080p.mp4",
+  "https://videos.pexels.com/video-files/8064146/8064146-uhd_2560_1440_30fps.mp4",
 ];
 const VIDEO_POSTER =
   "https://images.unsplash.com/photo-1530103862676-de8c9debad1d?auto=format&fit=crop&w=1600&h=900&q=70";
@@ -176,18 +177,21 @@ export function CTAFinal() {
         onError={() => {
           if (videoIdx < VIDEO_SOURCES.length - 1) setVideoIdx((i) => i + 1);
         }}
-        // filter: blur(2px) suaviza cualquier globo destacado en primer plano
-        // y enfatiza que el video es ambiente, no protagonista.
-        style={{ filter: "blur(2px)", transform: "scale(1.06)" }}
+        // Phase Q.1: blur + brightness reducido para que el video sea ambiente
+        // puro. El scale evita que el blur deje halo gris en los bordes.
+        style={{
+          filter: "blur(1px) brightness(0.7)",
+          transform: "scale(1.06)",
+        }}
         className="pointer-events-none absolute inset-0 z-0 h-[115%] w-full object-cover -top-[7.5%]"
       >
         <source src={videoSrc} type="video/mp4" />
       </video>
 
-      {/* Overlay morado MÁS opaco para legibilidad fuerte del texto */}
+      {/* Overlay morado muy opaco — texto siempre dominante */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 z-0 bg-gradient-to-b from-bb-purple/90 via-bb-purple/85 to-bb-purple/95"
+        className="pointer-events-none absolute inset-0 z-0 bg-gradient-to-b from-bb-purple/95 via-bb-purple/92 to-bb-purple/97"
       />
       {/* Noise sutil */}
       <div
