@@ -72,13 +72,31 @@ function maskEmail(e: string): string {
   return `${user[0]}***@${dom}`;
 }
 
+/** Safe trim que tolera undefined / null */
+function safe(v: unknown): string {
+  if (typeof v !== "string") return "";
+  return v.trim();
+}
+
 export async function POST(req: Request) {
   const t0 = Date.now();
 
+  // Diagnóstico de env vars en runtime — clave para debug en Vercel
+  console.info("[/api/lead] env check", {
+    has_webhook_url: !!GHL_WEBHOOK_URL,
+    webhook_prefix: GHL_WEBHOOK_URL?.slice(0, 50) || "EMPTY",
+    node_env: process.env.NODE_ENV,
+  });
+
   if (!GHL_WEBHOOK_URL) {
-    console.error("[/api/lead] Falta GHL_WEBHOOK_URL en env");
+    console.error(
+      "[/api/lead] CRITICO: GHL_WEBHOOK_URL no esta configurada en env vars de Vercel"
+    );
     return NextResponse.json(
-      { error: "Backend no configurado" },
+      {
+        error: "Backend no configurado. Verificar env vars en Vercel.",
+        code: "missing_env",
+      },
       { status: 500 }
     );
   }
@@ -87,31 +105,43 @@ export async function POST(req: Request) {
   try {
     answers = (await req.json()) as QuizAnswers;
   } catch {
-    return NextResponse.json({ error: "JSON inválido" }, { status: 400 });
+    return NextResponse.json(
+      { error: "JSON inválido", code: "bad_json" },
+      { status: 400 }
+    );
   }
 
-  if (!answers?.contacto?.nombre || !answers?.contacto?.telefono) {
-    console.warn("[/api/lead] Faltan campos obligatorios");
+  const nombre = safe(answers?.contacto?.nombre);
+  const telefono = safe(answers?.contacto?.telefono);
+
+  if (!nombre || !telefono) {
+    console.warn("[/api/lead] Faltan campos obligatorios", {
+      has_nombre: !!nombre,
+      has_telefono: !!telefono,
+    });
     return NextResponse.json(
-      { error: "Faltan campos obligatorios (nombre, telefono)" },
+      {
+        error: "Faltan campos obligatorios (nombre, telefono)",
+        code: "missing_fields",
+      },
       { status: 400 }
     );
   }
 
   const payloadNuevo: GhlPayloadNuevo = {
-    nombre: answers.contacto.nombre.trim(),
-    telefono: answers.contacto.telefono.trim(),
-    email: answers.contacto.email?.trim() || "",
-    a_quien: answers.a_quien || "",
-    ocasion: answers.ocasion || answers.tipo_evento || "",
-    emocion: answers.emocion || "",
-    intencion: answers.intencion || "",
-    codigo_elegido: answers.codigo_elegido || answers.codigo_dec || "",
-    vision_descripcion: answers.vision_descripcion || "",
-    vision_paleta: answers.vision_paleta || "",
+    nombre,
+    telefono,
+    email: safe(answers?.contacto?.email),
+    a_quien: safe(answers.a_quien),
+    ocasion: safe(answers.ocasion) || safe(answers.tipo_evento),
+    emocion: safe(answers.emocion),
+    intencion: safe(answers.intencion),
+    codigo_elegido: safe(answers.codigo_elegido) || safe(answers.codigo_dec),
+    vision_descripcion: safe(answers.vision_descripcion),
+    vision_paleta: safe(answers.vision_paleta),
     personalizacion: answers.personalizacion_multi?.join(", ") || "",
-    fecha_estimada: answers.fecha_estimada || "",
-    fecha_exacta: answers.fecha_exacta || answers.fecha_evento || "",
+    fecha_estimada: safe(answers.fecha_estimada),
+    fecha_exacta: safe(answers.fecha_exacta) || safe(answers.fecha_evento),
     resumen_quiz: buildResumen(answers),
     source: "landing_big_bang_funnel_v2",
   };
@@ -182,13 +212,23 @@ export async function POST(req: Request) {
         body: body.slice(0, 300),
         dt,
       });
-      return NextResponse.json({ error: "Backend error" }, { status: 502 });
+      return NextResponse.json(
+        {
+          error: `Backend GHL respondió ${ghlRes.status}`,
+          code: "ghl_error",
+          status: ghlRes.status,
+        },
+        { status: 502 }
+      );
     }
 
     console.info("[/api/lead] OK", { status: ghlRes.status, dt });
     return NextResponse.json({ ok: true });
   } catch (e) {
     console.error("[/api/lead] Network", e);
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Error de red al contactar GHL", code: "network" },
+      { status: 500 }
+    );
   }
 }

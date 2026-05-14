@@ -42,6 +42,19 @@
 }
 
 /* ─── Reset y base ────────────────────────────────────────────── */
+/* Phase Q.3: lockdown anti-overflow horizontal. Funciona también al hacer
+   zoom out — sin importar el zoom level, no aparece scrollbar horizontal. */
+html,
+body {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
+main {
+  overflow-x: clip;
+  max-width: 100vw;
+}
+
 html {
   scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;

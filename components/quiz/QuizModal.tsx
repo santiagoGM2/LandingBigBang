@@ -32,7 +32,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Balloons, type BalloonsHandle } from "@/components/ui/balloons";
 
-import { submitLead, type QuizAnswers, type Intencion } from "@/lib/ghl";
+import {
+  submitLead,
+  SubmitLeadError,
+  type QuizAnswers,
+  type Intencion,
+} from "@/lib/ghl";
 import { CODIGOS_DEC, type Categoria, type CodigoDec } from "@/lib/codigos-dec";
 import {
   trackQuizComplete,
@@ -459,11 +464,31 @@ export function QuizModal({
     setSubmitting(true);
     setSubmitError(null);
     try {
-      await submitLead({
-        ...(answers as QuizAnswers),
+      // Construir payload con guards: TODOS los campos opcionales del quiz
+      // saltados deben ser string vacío, NUNCA undefined, para que el endpoint
+      // no falle al hacer .trim() o concat sobre undefined.
+      const payload: QuizAnswers = {
         camino: answers.intencion === "personalizar" ? "A" : "B",
+        a_quien: answers.a_quien || "",
+        ocasion: answers.ocasion || "",
+        emocion: answers.emocion || "",
+        intencion: answers.intencion,
+        codigo_elegido: answers.codigo_elegido || "",
+        vision_descripcion: answers.vision_descripcion || "",
+        vision_paleta: answers.vision_paleta || "",
+        personalizacion_multi: answers.personalizacion_multi || [],
+        fecha_estimada: answers.fecha_estimada || "",
+        fecha_exacta: answers.fecha_exacta || "",
+        contacto: {
+          nombre: answers.contacto?.nombre || "",
+          telefono: answers.contacto?.telefono || "",
+          email: answers.contacto?.email || "",
+        },
         tipo_envio: "completo",
-      });
+      };
+
+      await submitLead(payload);
+
       try {
         localStorage.removeItem(STORAGE_KEY);
       } catch {
@@ -479,10 +504,30 @@ export function QuizModal({
         window.setTimeout(() => balloonsRef.current?.launchAnimation(), 220);
       }
     } catch (e) {
-      console.error(e);
-      const msg =
-        "No pudimos enviar tu información. Probá de nuevo o escribinos por WhatsApp.";
-      setSubmitError(msg);
+      // El log de consola muestra detalles para debug; el toast al usuario es genérico.
+      console.error("[QuizModal submit error]", e);
+
+      let msg = "No pudimos enviar tu información. Probá de nuevo o escribinos por WhatsApp.";
+      let debugDetail = "";
+
+      if (e instanceof SubmitLeadError) {
+        debugDetail = `[${e.code || "unknown"}] HTTP ${e.status}: ${e.message}`;
+        // Mensaje más explícito si el backend reporta env vars faltantes
+        if (e.code === "missing_env") {
+          msg =
+            "El servicio de envío está en mantenimiento. Escribinos directo por WhatsApp y te contactamos al instante.";
+        } else if (e.code === "ghl_error") {
+          msg =
+            "No pudimos conectar con el sistema. Probá de nuevo en un momento o escribinos por WhatsApp.";
+        }
+      } else if (e instanceof Error) {
+        debugDetail = e.message;
+      } else {
+        debugDetail = String(e);
+      }
+
+      console.error("[QuizModal submit detail]", debugDetail);
+      setSubmitError(`${msg} (${debugDetail})`);
       toast.error("Algo salió mal", { description: msg });
     } finally {
       setSubmitting(false);
@@ -590,14 +635,17 @@ export function QuizModal({
         ) : (
           currentStep && (
             <div>
-              <ProgressBar
-                current={currentStep.progressIndex}
-                total={7}
-              />
+              {/* pr-12 reserva espacio para el botón X de cerrar (absolute right-5 + h-10 w-10) */}
+              <div className="pr-12 md:pr-14">
+                <ProgressBar
+                  current={currentStep.progressIndex}
+                  total={7}
+                />
+              </div>
 
               {currentStep.key === "contacto" ? (
                 <>
-                  <h2 className="mt-6 text-2xl md:text-3xl font-extrabold text-bb-purple leading-tight">
+                  <h2 className="mt-6 pr-12 md:pr-0 text-2xl md:text-3xl font-extrabold text-bb-purple leading-tight">
                     {currentStep.title}
                   </h2>
                   <p className="mt-1.5 text-sm text-bb-text/65">
@@ -606,11 +654,11 @@ export function QuizModal({
                   </p>
                 </>
               ) : currentStep.key === "pausa_visual" ? (
-                <h2 className="mt-6 text-lg md:text-xl font-bold text-bb-purple/85 leading-snug">
+                <h2 className="mt-6 pr-12 md:pr-0 text-lg md:text-xl font-bold text-bb-purple/85 leading-snug">
                   {currentStep.title}
                 </h2>
               ) : (
-                <h2 className="mt-6 text-2xl md:text-3xl font-extrabold text-bb-purple leading-tight">
+                <h2 className="mt-6 pr-12 md:pr-0 text-2xl md:text-3xl font-extrabold text-bb-purple leading-tight">
                   {currentStep.title}
                 </h2>
               )}
@@ -649,11 +697,12 @@ export function QuizModal({
                     size="lg"
                     onClick={handleSubmit}
                     disabled={!canAdvance || submitting}
+                    className="max-w-full whitespace-normal text-left leading-snug"
                   >
                     {submitting ? (
                       <>
                         <Loader2 className="h-5 w-5 animate-spin" />
-                        Enviando...
+                        Asegurando tu reserva...
                       </>
                     ) : (
                       <>

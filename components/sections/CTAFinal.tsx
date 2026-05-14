@@ -26,10 +26,14 @@ const MAGNETIC_RADIUS = 80;
 const MAGNETIC_MAX = 8;
 const TILT_MAX = 4;
 
-const VIDEO_SRC =
-  "https://cdn.coverr.co/videos/coverr-balloons-rising-in-the-sky-6262/1080p.mp4";
-const VIDEO_FALLBACK =
-  "https://videos.pexels.com/video-files/3796535/3796535-hd_1920_1080_30fps.mp4";
+// Phase Q.4: video alternativo con foco más sutil. Cadena de fallback —
+// si el primero no carga (CDN caído, CORS, etc) cae al siguiente.
+const VIDEO_SOURCES = [
+  "https://videos.pexels.com/video-files/8068291/8068291-uhd_2560_1440_25fps.mp4",
+  "https://videos.pexels.com/video-files/6963747/6963747-hd_1920_1080_30fps.mp4",
+  "https://videos.pexels.com/video-files/3209828/3209828-hd_1920_1080_25fps.mp4",
+  "https://cdn.coverr.co/videos/coverr-balloons-rising-in-the-sky-6262/1080p.mp4",
+];
 const VIDEO_POSTER =
   "https://images.unsplash.com/photo-1530103862676-de8c9debad1d?auto=format&fit=crop&w=1600&h=900&q=70";
 
@@ -47,7 +51,8 @@ export function CTAFinal() {
   const btnRef = React.useRef<HTMLButtonElement>(null);
   const animate = mounted && !reduced;
   const enable3D = animate && desktop;
-  const [videoSrc, setVideoSrc] = React.useState(VIDEO_SRC);
+  const [videoIdx, setVideoIdx] = React.useState(0);
+  const videoSrc = VIDEO_SOURCES[videoIdx];
 
   // Magnetic translate
   const mx = useMotionValue(0);
@@ -157,8 +162,9 @@ export function CTAFinal() {
       ref={sectionRef}
       className="relative overflow-hidden bg-bb-purple py-24 md:py-32 text-white"
     >
-      {/* Video background loop. Parallax via GSAP. */}
+      {/* Video background loop. Blur sutil + parallax via GSAP. */}
       <video
+        key={videoSrc}
         ref={videoRef}
         aria-hidden
         autoPlay
@@ -168,17 +174,20 @@ export function CTAFinal() {
         preload="metadata"
         poster={VIDEO_POSTER}
         onError={() => {
-          if (videoSrc !== VIDEO_FALLBACK) setVideoSrc(VIDEO_FALLBACK);
+          if (videoIdx < VIDEO_SOURCES.length - 1) setVideoIdx((i) => i + 1);
         }}
+        // filter: blur(2px) suaviza cualquier globo destacado en primer plano
+        // y enfatiza que el video es ambiente, no protagonista.
+        style={{ filter: "blur(2px)", transform: "scale(1.06)" }}
         className="pointer-events-none absolute inset-0 z-0 h-[115%] w-full object-cover -top-[7.5%]"
       >
         <source src={videoSrc} type="video/mp4" />
       </video>
 
-      {/* Overlay morado para legibilidad */}
+      {/* Overlay morado MÁS opaco para legibilidad fuerte del texto */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 z-0 bg-gradient-to-b from-bb-purple/80 via-bb-purple/70 to-bb-purple/90"
+        className="pointer-events-none absolute inset-0 z-0 bg-gradient-to-b from-bb-purple/90 via-bb-purple/85 to-bb-purple/95"
       />
       {/* Noise sutil */}
       <div
