@@ -12,7 +12,7 @@ import {
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { PartyPopper, Zap, Palette, Truck, type LucideIcon } from "lucide-react";
+import { PartyPopper, Zap, Palette, Store, Bike, type LucideIcon } from "lucide-react";
 
 import { NumberTicker } from "@/components/ui/number-ticker";
 import { Button } from "@/components/ui/button";
@@ -22,9 +22,12 @@ import { cn } from "@/lib/utils";
 
 interface Stat {
   icon: LucideIcon;
-  value: number;
+  /** Si es number: animado con ticker. Si es string: render directo (ej "+10.000") */
+  value: number | string;
   prefix?: string;
   suffix?: string;
+  /** Render alternativo del header de la card (para card 4 con dos íconos) */
+  customHeader?: React.ReactNode;
   title: string;
   caption: string;
   micro: string;
@@ -33,36 +36,48 @@ interface Stat {
 const STATS: Stat[] = [
   {
     icon: PartyPopper,
-    value: 80,
+    value: 10000,
     prefix: "+",
-    title: "fiestas decoradas",
-    caption: "Cada montaje con su propia historia.",
-    micro: "en los últimos 12 meses",
+    title: "decoraciones con globos entregadas",
+    caption:
+      "Cada una diseñada para que alguien abra una puerta y no pueda contener las lágrimas.",
+    micro: "en más de 8 años haciendo magia en Cali",
   },
   {
     icon: Zap,
-    value: 24,
-    prefix: "<",
-    suffix: "h",
-    title: "respuesta garantizada",
-    caption: "Tu primera asesoría sin esperas.",
-    micro: "promedio real de los últimos 60 leads",
+    value: 15,
+    prefix: "-",
+    suffix: " min",
+    title: "tiempo de respuesta garantizado",
+    caption:
+      "Sabemos que cuando quieres sorprender a alguien, cada minuto cuenta.",
+    micro: "respondemos por WhatsApp más rápido que tu pizza favorita",
   },
   {
     icon: Palette,
-    value: 50,
+    value: 1000,
     prefix: "+",
     title: "temáticas disponibles",
-    caption: "Y todas se personalizan al 100%.",
-    micro: "codigo DEC-001 al DEC-050 + a medida",
+    caption: "Y si la que buscas no existe, la creamos desde cero contigo.",
+    micro: "desde princesas hasta referencias de Netflix — todo personalizable",
   },
   {
-    icon: Truck,
-    value: 100,
-    suffix: "%",
-    title: "entrega rápida en Cali",
-    caption: "Montaje el mismo día del evento.",
-    micro: "Yumbo, Palmira y Jamundí con transporte aparte",
+    icon: Store,
+    value: "",
+    customHeader: (
+      <div className="flex items-center gap-3">
+        <span className="grid h-12 w-12 place-items-center rounded-2xl bg-bb-pink-soft text-bb-pink">
+          <Store className="h-6 w-6" strokeWidth={2.2} />
+        </span>
+        <span className="text-3xl font-extrabold text-bb-purple/40">+</span>
+        <span className="grid h-12 w-12 place-items-center rounded-2xl bg-bb-pink-soft text-bb-pink">
+          <Bike className="h-6 w-6" strokeWidth={2.2} />
+        </span>
+      </div>
+    ),
+    title: "recoge en tienda o te lo llevamos",
+    caption: "Tú decides cómo quieres recibir la magia.",
+    micro: "Calle 9 # 30-44, Cali · domicilio disponible en toda la ciudad",
   },
 ];
 
@@ -118,12 +133,15 @@ export function StatsPotenciadas() {
   return (
     <section className="relative bg-bb-pink-soft py-20 md:py-28">
       <div className="mx-auto max-w-7xl px-6">
-        <div className="mx-auto max-w-2xl text-center">
+        <div className="mx-auto max-w-3xl text-center">
           <h2 className="text-3xl md:text-4xl font-extrabold text-bb-purple leading-tight">
-            Lo que hay detrás del recuerdo
+            Números que no mienten —{" "}
+            <span className="text-bb-pink">
+              detrás de cada globo hay una historia real
+            </span>
           </h2>
           <p className="mt-3 text-bb-text/75">
-            Números que se traducen en montajes que se sienten cuidados.
+            Esto es lo que hemos construido en Cali, una decoración a la vez.
           </p>
         </div>
 
@@ -159,10 +177,14 @@ export function StatsPotenciadas() {
           </div>
         </div>
 
-        <div className="mt-12 text-center">
+        <div className="mt-14 text-center">
           <Button size="lg" onClick={() => open()}>
-            Quiero empezar mi historia
+            Ver si hay cupo para mi fecha →
           </Button>
+          <p className="mt-3 text-sm text-bb-text/65 max-w-md mx-auto">
+            Solo aceptamos 3 montajes de alta gama por semana para garantizar
+            cada detalle
+          </p>
         </div>
       </div>
     </section>
@@ -243,19 +265,34 @@ function StatCard({ stat, index, reduced }: { stat: Stat; index: number; reduced
       </span>
 
       {/* Capas con translateZ creciente para generar 4 planos de profundidad */}
-      <div
-        className="relative inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-bb-pink-soft text-bb-pink transition-colors group-hover:bg-bb-pink group-hover:text-white"
-        style={{ transform: "translateZ(25px)" }}
-      >
-        <Icon className="h-6 w-6" aria-hidden strokeWidth={2.2} />
-      </div>
+      {stat.customHeader ? (
+        <div
+          className="relative"
+          style={{ transform: "translateZ(25px)" }}
+        >
+          {stat.customHeader}
+        </div>
+      ) : (
+        <div
+          className="relative inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-bb-pink-soft text-bb-pink transition-colors group-hover:bg-bb-pink group-hover:text-white"
+          style={{ transform: "translateZ(25px)" }}
+        >
+          <Icon className="h-6 w-6" aria-hidden strokeWidth={2.2} />
+        </div>
+      )}
 
-      <div
-        className="relative mt-5 text-5xl font-extrabold leading-none text-bb-purple md:text-6xl"
-        style={{ transform: "translateZ(40px)" }}
-      >
-        <NumberTicker value={stat.value} prefix={stat.prefix} suffix={stat.suffix} />
-      </div>
+      {typeof stat.value === "number" && (
+        <div
+          className="relative mt-5 text-5xl font-extrabold leading-none text-bb-purple md:text-6xl"
+          style={{ transform: "translateZ(40px)" }}
+        >
+          <NumberTicker
+            value={stat.value}
+            prefix={stat.prefix}
+            suffix={stat.suffix}
+          />
+        </div>
+      )}
 
       <p
         className="relative mt-3 font-bold text-bb-text"

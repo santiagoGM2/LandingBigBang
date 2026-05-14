@@ -8,6 +8,8 @@ export interface ImageGalleryItem {
   alt: string;
   label: string;
   count?: number;
+  /** Microcopy emocional que sustituye al recuento de códigos cuando presente */
+  microcopy?: string;
   onClick?: () => void;
 }
 
@@ -87,11 +89,15 @@ export function ImageGallery({ items, className }: ImageGalleryProps) {
             <h3 className="text-3xl md:text-4xl font-extrabold leading-tight text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]">
               {item.label}
             </h3>
-            {item.count !== undefined && (
+            {item.microcopy ? (
+              <p className="mt-2 text-base font-bold text-bb-lime leading-snug">
+                {item.microcopy}
+              </p>
+            ) : item.count !== undefined ? (
               <p className="mt-2 text-lg font-bold text-bb-lime">
                 {item.count} {item.count === 1 ? "código" : "códigos"}
               </p>
-            )}
+            ) : null}
             <div className="mt-4 inline-flex items-center gap-2 font-semibold text-white">
               <span>Click para explorar</span>
               <ArrowRight className="h-4 w-4" />

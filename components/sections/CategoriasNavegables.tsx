@@ -36,67 +36,61 @@ const COUNT_BY_CAT: Record<Categoria, number> = CODIGOS_DEC.reduce(
 );
 
 /**
- * 8 items hardcoded — labels, imágenes y counts conocidos. onClick mapea al
- * Categoria type del dataset para conservar el modo "explorando" intacto.
- * Las URLs Unsplash son las del spec del cliente para esta versión.
+ * 7 items (Empresarial movido al footer) — labels, imágenes y microcopy
+ * emocional. onClick además dispara un toast confirmando la categoría.
  */
-function buildItems(setSelected: (c: Categoria) => void): ImageGalleryItem[] {
+function buildItems(
+  pickCategoria: (c: Categoria, label: string) => void
+): ImageGalleryItem[] {
   return [
     {
       src: "https://images.unsplash.com/photo-1530103862676-de8c9debad1d?auto=format&fit=crop&w=600&h=900&q=80",
       alt: "Decoración cumpleaños infantil",
       label: "Cumple infantil",
-      count: COUNT_BY_CAT.cumple_infantil,
-      onClick: () => setSelected("cumple_infantil"),
+      microcopy: `+${COUNT_BY_CAT.cumple_infantil} diseños · el más pedido`,
+      onClick: () => pickCategoria("cumple_infantil", "Cumple infantil"),
     },
     {
       src: "https://images.unsplash.com/photo-1464349095431-e9a21285b5f3?auto=format&fit=crop&w=600&h=900&q=80",
       alt: "Decoración cumpleaños adulto",
       label: "Cumple adulto",
-      count: COUNT_BY_CAT.cumple_adulto,
-      onClick: () => setSelected("cumple_adulto"),
+      microcopy: `+${COUNT_BY_CAT.cumple_adulto} diseños · ideal para sorpresas`,
+      onClick: () => pickCategoria("cumple_adulto", "Cumple adulto"),
     },
     {
       src: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=600&h=900&q=80",
       alt: "Decoración baby shower",
       label: "Baby shower",
-      count: COUNT_BY_CAT.baby,
-      onClick: () => setSelected("baby"),
+      microcopy: `+${COUNT_BY_CAT.baby} diseños · dulce y especial`,
+      onClick: () => pickCategoria("baby", "Baby shower"),
     },
     {
       src: "https://images.unsplash.com/photo-1513151233558-d860c5398176?auto=format&fit=crop&w=600&h=900&q=80",
       alt: "Decoración bautizo y comunión",
       label: "Bautizo / Comunión",
-      count: COUNT_BY_CAT.religioso,
-      onClick: () => setSelected("religioso"),
+      microcopy: `+${COUNT_BY_CAT.religioso} diseños · elegante y emotivo`,
+      onClick: () => pickCategoria("religioso", "Bautizo / Comunión"),
     },
     {
       src: "https://images.unsplash.com/photo-1523580494863-6f3031224c94?auto=format&fit=crop&w=600&h=900&q=80",
       alt: "Decoración graduación",
       label: "Grado",
-      count: COUNT_BY_CAT.grado,
-      onClick: () => setSelected("grado"),
+      microcopy: `+${COUNT_BY_CAT.grado} diseños · el momento del orgullo`,
+      onClick: () => pickCategoria("grado", "Grado"),
     },
     {
       src: "https://images.unsplash.com/photo-1519225421980-715cb0215aed?auto=format&fit=crop&w=600&h=900&q=80",
       alt: "Decoración romántica",
       label: "Romántico",
-      count: COUNT_BY_CAT.romantico,
-      onClick: () => setSelected("romantico"),
-    },
-    {
-      src: "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&w=600&h=900&q=80",
-      alt: "Decoración empresarial",
-      label: "Empresarial",
-      count: COUNT_BY_CAT.empresarial,
-      onClick: () => setSelected("empresarial"),
+      microcopy: `+${COUNT_BY_CAT.romantico} diseños · el favorito de las parejas`,
+      onClick: () => pickCategoria("romantico", "Romántico"),
     },
     {
       src: "https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?auto=format&fit=crop&w=600&h=900&q=80",
       alt: "Decoración temática especial",
       label: "Especial",
-      count: COUNT_BY_CAT.especial,
-      onClick: () => setSelected("especial"),
+      microcopy: `+${COUNT_BY_CAT.especial} diseños · cuando lo común no alcanza`,
+      onClick: () => pickCategoria("especial", "Especial"),
     },
   ];
 }
@@ -119,7 +113,20 @@ export function CategoriasNavegables() {
     return () => window.removeEventListener("resize", check);
   }, []);
 
-  const items = React.useMemo(() => buildItems(setSelected), []);
+  const pickCategoria = React.useCallback(
+    (cat: Categoria, label: string) => {
+      setSelected(cat);
+      toast.success(
+        `Perfecto — te mostramos nuestros diseños para ${label}`
+      );
+    },
+    []
+  );
+
+  const items = React.useMemo(
+    () => buildItems(pickCategoria),
+    [pickCategoria]
+  );
 
   const codigosDeCategoria = React.useMemo(
     () => (selected ? CODIGOS_DEC.filter((c) => c.categoria === selected) : []),
@@ -143,11 +150,11 @@ export function CategoriasNavegables() {
             <Sparkles className="h-4 w-4" /> Explorá por categoría
           </span>
           <h2 className="mt-4 text-3xl md:text-5xl font-extrabold text-bb-purple leading-tight">
-            Cada montaje es único como tu visión
+            ¿Para qué momento estás creando el recuerdo?
           </h2>
           <p className="mt-4 text-lg text-bb-text/70 max-w-2xl mx-auto leading-relaxed">
-            Recorridos de fiestas que diseñamos para clientes que querían algo
-            que nadie más tuviera
+            Escoge tu ocasión y te mostramos exactamente lo que hemos creado
+            para momentos como el tuyo.
           </p>
         </div>
 
@@ -216,6 +223,23 @@ export function CategoriasNavegables() {
             </motion.div>
           )}
         </AnimatePresence>
+
+        {selected === null && (
+          <div className="mt-12 text-center">
+            <button
+              type="button"
+              onClick={() => open()}
+              className="group inline-flex items-center gap-2 text-bb-purple font-bold hover:text-bb-pink transition-colors"
+            >
+              <span className="underline underline-offset-4 decoration-2 decoration-bb-pink/40 group-hover:decoration-bb-pink">
+                No encuentras tu ocasión → Cuéntanos y la creamos desde cero
+              </span>
+            </button>
+            <p className="mt-2 text-sm text-bb-text/65">
+              Tenemos más de 1.000 temáticas y todas se personalizan al 100%
+            </p>
+          </div>
+        )}
       </div>
     </section>
   );
@@ -247,11 +271,15 @@ function MobileGrid({ items }: { items: ImageGalleryItem[] }) {
             <h3 className="text-base font-extrabold leading-tight text-white">
               {item.label}
             </h3>
-            {item.count !== undefined && (
+            {item.microcopy ? (
+              <p className="text-xs font-bold text-bb-lime leading-tight">
+                {item.microcopy}
+              </p>
+            ) : item.count !== undefined ? (
               <p className="text-xs font-bold text-bb-lime">
                 {item.count} códigos
               </p>
-            )}
+            ) : null}
           </div>
         </button>
       ))}

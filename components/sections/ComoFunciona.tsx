@@ -224,8 +224,11 @@ export function ComoFunciona() {
 
         <div className="mt-14 text-center">
           <Button size="lg" onClick={() => open()}>
-            Empezar mi quiz de 60 segundos
+            Yo solo quiero abrir esa puerta → Empezar ahora
           </Button>
+          <p className="mt-3 text-sm text-bb-text/65">
+            Gratis · Sin compromiso · Respuesta en menos de 15 minutos
+          </p>
         </div>
       </div>
     </section>

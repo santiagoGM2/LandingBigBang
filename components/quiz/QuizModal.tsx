@@ -5,12 +5,23 @@ import Image from "next/image";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { toast } from "sonner";
 import {
-  Sparkles,
   ArrowLeft,
   ArrowRight,
   Loader2,
   Instagram,
   PartyPopper,
+  Heart,
+  Cake,
+  Baby,
+  Sparkles,
+  GraduationCap,
+  Gift,
+  MessageCircle,
+  Pencil,
+  Lightbulb,
+  Calendar,
+  Check,
+  type LucideIcon,
 } from "lucide-react";
 
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
@@ -21,12 +32,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Balloons, type BalloonsHandle } from "@/components/ui/balloons";
 
-import { submitLead, type QuizAnswers, type CaminoQuiz } from "@/lib/ghl";
-import {
-  CODIGOS_DEC,
-  CATEGORIA_LABEL,
-  type CodigoDec,
-} from "@/lib/codigos-dec";
+import { submitLead, type QuizAnswers, type Intencion } from "@/lib/ghl";
+import { CODIGOS_DEC, type Categoria, type CodigoDec } from "@/lib/codigos-dec";
 import {
   trackQuizComplete,
   trackQuizPartial,
@@ -35,51 +42,208 @@ import {
 } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
 
-type Phase = "welcome" | "A" | "B" | "success";
-const STORAGE_KEY = "bb-quiz-state-v1";
+const STORAGE_KEY = "bb-quiz-state-v2";
 
-const PARA_QUIEN = [
-  "Para mi hijo o hija",
-  "Para mi pareja",
-  "Para mi mamá o papá",
-  "Para mí",
-  "Para un amigo",
-  "Para alguien especial",
-  "Otro",
+/* ─── Datasets de opciones ──────────────────────────────────── */
+
+interface IconOption {
+  value: string;
+  label: string;
+  icon: LucideIcon;
+}
+
+const A_QUIEN: IconOption[] = [
+  { value: "A mi pareja", label: "A mi pareja", icon: Heart },
+  { value: "A mi mamá / papá", label: "A mi mamá / papá", icon: Cake },
+  { value: "A mi hijo/hija", label: "A mi hijo/hija", icon: Baby },
+  { value: "A alguien especial", label: "A alguien especial", icon: Sparkles },
 ];
 
-const TIPOS_EVENTO = [
-  "Cumpleaños infantil",
-  "Cumpleaños de adulto",
-  "Baby shower",
-  "Gender reveal",
-  "Bautizo o primera comunión",
-  "Grado",
-  "Aniversario",
-  "Evento empresarial",
-  "Otro",
+const OCASIONES: IconOption[] = [
+  { value: "Su cumpleaños", label: "Su cumpleaños", icon: Cake },
+  { value: "Nuestro aniversario", label: "Nuestro aniversario", icon: Heart },
+  { value: "Está esperando un bebé", label: "Está esperando un bebé", icon: Baby },
+  { value: "Se acaba de graduar", label: "Se acaba de graduar", icon: GraduationCap },
+  { value: "Sorpresa sin motivo", label: "Solo quiero sorprenderla sin motivo", icon: Gift },
+  { value: "Otra ocasión especial", label: "Otra ocasión especial", icon: Sparkles },
 ];
 
-const PERSONALIZACION_OPCIONES = [
-  { value: "tal_cual", label: "Tal cual lo veo en el código" },
-  { value: "cambios", label: "Le cambio algunos detalles" },
-  { value: "inspiracion", label: "Lo uso como inspiración, pero quiero algo único" },
+interface IntencionOption {
+  value: Intencion;
+  label: string;
+  icon: LucideIcon;
+}
+
+const INTENCIONES: IntencionOption[] = [
+  { value: "personalizar", label: "Quiero personalizar una de estas", icon: Pencil },
+  { value: "cero", label: "Tengo una idea desde cero", icon: Lightbulb },
+  { value: "sorprendeme", label: "Sorpréndanme — confío en ustedes", icon: Sparkles },
+  { value: "asesoria", label: "Prefiero que me asesoren", icon: MessageCircle },
 ];
 
-const TIENE_TEMATICA_OPCIONES = [
-  { value: "si", label: "Sí, ya sé qué quiero" },
-  { value: "idea_asesoria", label: "Tengo una idea pero necesito asesoría" },
-  { value: "recomendaciones", label: "Quiero que me recomienden" },
+const PERSONALIZACION_MULTI = [
+  "Los colores",
+  "Los detalles decorativos",
+  "Un mensaje personalizado",
+  "Agregar más elementos",
+  "Me gusta tal cual",
+  "Prefiero que me asesoren",
 ];
 
-const PRESUPUESTOS = [
-  "Menos de 300.000",
-  "300.000 a 600.000",
-  "600.000 a 1.000.000",
-  "1.000.000 a 2.000.000",
-  "Más de 2.000.000",
-  "Aún no lo tengo definido",
+const FECHAS: IconOption[] = [
+  { value: "Esta semana", label: "Esta semana", icon: Calendar },
+  { value: "En 15 días", label: "En 15 días", icon: Calendar },
+  { value: "En un mes o más", label: "En un mes o más", icon: Calendar },
+  { value: "Asesoría", label: "Prefiero que me asesoren", icon: MessageCircle },
 ];
+
+const PALETAS: Array<{ value: string; label: string; from: string; to: string }> = [
+  { value: "Rosa y morado", label: "Rosa y morado", from: "#E91E8C", to: "#3D1A6E" },
+  { value: "Pastel suave", label: "Pastel suave", from: "#FFD1E7", to: "#D9E4FF" },
+  { value: "Verde y dorado", label: "Verde y dorado", from: "#7DC720", to: "#FFD93D" },
+  { value: "Negro y dorado", label: "Negro y dorado", from: "#222", to: "#FFD93D" },
+];
+
+/* ─── Mapping ocasión → categorías para galería visual ──────── */
+function categoriasFromContext(
+  aQuien?: string,
+  ocasion?: string
+): Categoria[] {
+  if (ocasion === "Nuestro aniversario") return ["romantico"];
+  if (ocasion === "Está esperando un bebé") return ["baby"];
+  if (ocasion === "Se acaba de graduar") return ["grado"];
+  if (ocasion === "Otra ocasión especial" || ocasion === "Sorpresa sin motivo")
+    return ["especial", "romantico", "cumple_adulto"];
+  if (ocasion === "Su cumpleaños") {
+    if (aQuien === "A mi hijo/hija") return ["cumple_infantil"];
+    if (aQuien === "A mi pareja") return ["cumple_adulto", "romantico"];
+    return ["cumple_adulto", "cumple_infantil"];
+  }
+  return ["cumple_adulto", "especial", "romantico"];
+}
+
+function pickGallery(
+  aQuien?: string,
+  ocasion?: string,
+  limit = 6
+): CodigoDec[] {
+  const cats = categoriasFromContext(aQuien, ocasion);
+  const matches = CODIGOS_DEC.filter((c) => cats.includes(c.categoria));
+  const pool = matches.length >= limit ? matches : CODIGOS_DEC;
+  return pool.slice(0, limit);
+}
+
+/* ─── Definición declarativa de los 7 pasos ─────────────────── */
+
+type StepKey =
+  | "a_quien"
+  | "ocasion"
+  | "pausa_visual"
+  | "intencion"
+  | "personalizar_galeria"
+  | "vision_cero"
+  | "personalizacion_multi"
+  | "fecha_estimada"
+  | "contacto";
+
+interface StepDef {
+  key: StepKey;
+  title: string;
+  isValid: (a: Partial<QuizAnswers>) => boolean;
+  /** Pasos visibles en la barra de progreso (1..7) */
+  progressIndex: number;
+}
+
+const ALL_STEPS: StepDef[] = [
+  {
+    key: "a_quien",
+    title: "¿A quién quieres dejar sin palabras?",
+    isValid: (a) => !!a.a_quien,
+    progressIndex: 1,
+  },
+  {
+    key: "ocasion",
+    title: "¿Qué está a punto de vivir esa persona?",
+    isValid: (a) => !!a.ocasion,
+    progressIndex: 2,
+  },
+  {
+    key: "pausa_visual",
+    title:
+      "Fotos reales según el tipo de persona y ocasión que elegiste. Solo para que tu cerebro empiece a imaginar.",
+    isValid: () => true,
+    progressIndex: 2,
+  },
+  {
+    key: "intencion",
+    title: "¿Alguna de estas te habló por dentro?",
+    isValid: (a) => !!a.intencion,
+    progressIndex: 3,
+  },
+  {
+    key: "personalizar_galeria",
+    title: "¿Cuál de estas decoraciones te enamoró?",
+    isValid: (a) => !!a.codigo_elegido,
+    progressIndex: 4,
+  },
+  {
+    key: "vision_cero",
+    title: "Describime tu visión en pocas palabras",
+    isValid: (a) =>
+      (a.vision_descripcion?.trim().length ?? 0) >= 4 || !!a.vision_paleta,
+    progressIndex: 4,
+  },
+  {
+    key: "personalizacion_multi",
+    title: "¿Qué le agregarías o cambiarías?",
+    isValid: (a) => (a.personalizacion_multi?.length ?? 0) >= 1,
+    progressIndex: 5,
+  },
+  {
+    key: "fecha_estimada",
+    title: "¿Para cuándo es la sorpresa?",
+    isValid: (a) => !!a.fecha_estimada,
+    progressIndex: 6,
+  },
+  {
+    key: "contacto",
+    title: "Último paso — ¿cómo te contactamos?",
+    isValid: (a) =>
+      (a.contacto?.nombre?.trim().length ?? 0) >= 2 &&
+      /^\+?\d[\d\s-]{7,}$/.test(a.contacto?.telefono ?? ""),
+    progressIndex: 7,
+  },
+];
+
+function buildFlow(intencion?: Intencion): StepDef[] {
+  // Base: A quién → Ocasión → Pausa visual → Intención
+  const base = ALL_STEPS.filter((s) =>
+    ["a_quien", "ocasion", "pausa_visual", "intencion"].includes(s.key)
+  );
+  if (!intencion) return [...base, ALL_STEPS.find((s) => s.key === "contacto")!];
+
+  if (intencion === "sorprendeme" || intencion === "asesoria") {
+    return [
+      ...base,
+      ALL_STEPS.find((s) => s.key === "fecha_estimada")!,
+      ALL_STEPS.find((s) => s.key === "contacto")!,
+    ];
+  }
+
+  // personalizar / cero → cargan paso 4 distinto, luego comparten 5, 6, 7
+  const paso4 =
+    intencion === "personalizar"
+      ? ALL_STEPS.find((s) => s.key === "personalizar_galeria")!
+      : ALL_STEPS.find((s) => s.key === "vision_cero")!;
+
+  return [
+    ...base,
+    paso4,
+    ALL_STEPS.find((s) => s.key === "personalizacion_multi")!,
+    ALL_STEPS.find((s) => s.key === "fecha_estimada")!,
+    ALL_STEPS.find((s) => s.key === "contacto")!,
+  ];
+}
 
 const slideVariants = {
   enter: (dir: 1 | -1) => ({ x: dir === 1 ? 80 : -80, opacity: 0 }),
@@ -91,12 +255,10 @@ const slideTransition = { type: "spring" as const, stiffness: 260, damping: 25 }
 interface Props {
   open: boolean;
   onOpenChange: (o: boolean) => void;
-  /** Pre-llena código DEC y entra directo al Camino A */
+  /** Pre-selecciona un código DEC como punto de partida (rama "personalizar") */
   preselectedCodigo?: string | null;
-  /** Pre-llena respuestas del formulario inline y abre Camino B en el paso 2 */
+  /** Pre-llena respuestas desde inputs externos (QuizInline, ConexionEmocional) */
   inlineSeed?: Partial<QuizAnswers> | null;
-  /** Cierra el modal y hace scroll a la sección de mayoristas */
-  onRequestMayorista?: () => void;
 }
 
 export function QuizModal({
@@ -104,57 +266,62 @@ export function QuizModal({
   onOpenChange,
   preselectedCodigo,
   inlineSeed,
-  onRequestMayorista,
 }: Props) {
   const reduced = useReducedMotion();
-  const [phase, setPhase] = React.useState<Phase>("welcome");
   const [step, setStep] = React.useState(0);
   const [direction, setDirection] = React.useState<1 | -1>(1);
   const [answers, setAnswers] = React.useState<Partial<QuizAnswers>>({});
   const [submitting, setSubmitting] = React.useState(false);
   const [submitError, setSubmitError] = React.useState<string | null>(null);
+  const [success, setSuccess] = React.useState(false);
 
   const partialSent = React.useRef(false);
   const idleTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   const balloonsRef = React.useRef<BalloonsHandle>(null);
 
-  // ─── Persistencia localStorage + seed externo ───────────────
+  const flow = React.useMemo(
+    () => buildFlow(answers.intencion),
+    [answers.intencion]
+  );
+  const currentStep = flow[step];
+  const isLastStep = step === flow.length - 1;
+  const canAdvance = currentStep ? currentStep.isValid(answers) : false;
+
+  /* ─── Init + seed + persistencia ───────────────────────── */
   React.useEffect(() => {
     if (!open) return;
-    // 1. Seed inline (formulario embebido) gana sobre todo
+
     if (inlineSeed) {
-      setAnswers((a) => ({ ...a, ...inlineSeed, camino: "B" as CaminoQuiz }));
-      setPhase("B");
-      setStep(1); // paso 2 visible: "¿Para quién?"
+      setAnswers((a) => ({ ...a, ...inlineSeed }));
+      // Si ya viene con ocasion o emocion, saltar al paso 2 o 3
+      if (inlineSeed.ocasion) setStep(2);
+      else setStep(0);
       trackQuizStart();
       return;
     }
-    // 2. Restaurar de localStorage si existe
+
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) {
         const parsed = JSON.parse(raw) as {
-          phase?: Phase;
           step?: number;
           answers?: Partial<QuizAnswers>;
         };
         if (parsed.answers) setAnswers(parsed.answers);
-        if (parsed.phase) setPhase(parsed.phase);
         if (typeof parsed.step === "number") setStep(parsed.step);
       }
     } catch {
       /* ignore */
     }
-    // 3. Camino A directo si vino con código preseleccionado
+
     if (preselectedCodigo) {
       setAnswers((a) => ({
         ...a,
-        codigo_dec: preselectedCodigo,
-        camino: "A" as CaminoQuiz,
+        codigo_elegido: preselectedCodigo,
+        intencion: "personalizar",
       }));
-      setPhase("A");
-      setStep(1);
     }
+
     trackQuizStart();
   }, [open, preselectedCodigo, inlineSeed]);
 
@@ -163,33 +330,31 @@ export function QuizModal({
     try {
       localStorage.setItem(
         STORAGE_KEY,
-        JSON.stringify({ phase, step, answers })
+        JSON.stringify({ step, answers })
       );
     } catch {
       /* ignore */
     }
-  }, [open, phase, step, answers]);
+  }, [open, step, answers]);
 
-  // ─── Idle timer → envío parcial a los 60s ───────────────────
+  /* ─── Idle timer → envío parcial a los 60s ────────────── */
   const resetIdleTimer = React.useCallback(() => {
     if (idleTimer.current) clearTimeout(idleTimer.current);
     idleTimer.current = setTimeout(() => {
       if (partialSent.current) return;
-      // Solo si avanzó al menos al paso 3 (índice 2)
       if (step < 2) return;
       if (!answers.contacto?.telefono) return;
       partialSent.current = true;
-      const partial: QuizAnswers = {
+      submitLead({
         ...(answers as QuizAnswers),
-        camino: phase === "B" ? "B" : "A",
+        camino: answers.intencion === "personalizar" ? "A" : "B",
         tipo_envio: "parcial",
-      };
-      submitLead(partial).catch(() => {
+      }).catch(() => {
         /* no romper UX */
       });
       trackQuizPartial();
     }, 60_000);
-  }, [step, answers, phase]);
+  }, [step, answers]);
 
   React.useEffect(() => {
     if (!open) return;
@@ -199,11 +364,14 @@ export function QuizModal({
     };
   }, [open, resetIdleTimer]);
 
-  // ─── Helpers ────────────────────────────────────────────────
-  const update = React.useCallback(<K extends keyof QuizAnswers>(key: K, value: QuizAnswers[K]) => {
-    setAnswers((a) => ({ ...a, [key]: value }));
-    resetIdleTimer();
-  }, [resetIdleTimer]);
+  /* ─── Helpers ──────────────────────────────────────────── */
+  const update = React.useCallback(
+    <K extends keyof QuizAnswers>(key: K, value: QuizAnswers[K]) => {
+      setAnswers((a) => ({ ...a, [key]: value }));
+      resetIdleTimer();
+    },
+    [resetIdleTimer]
+  );
 
   const updateContacto = React.useCallback(
     (patch: Partial<NonNullable<QuizAnswers["contacto"]>>) => {
@@ -211,6 +379,20 @@ export function QuizModal({
         ...a,
         contacto: { nombre: "", telefono: "", ...(a.contacto || {}), ...patch },
       }));
+      resetIdleTimer();
+    },
+    [resetIdleTimer]
+  );
+
+  const toggleMulti = React.useCallback(
+    (opt: string) => {
+      setAnswers((a) => {
+        const current = a.personalizacion_multi || [];
+        const next = current.includes(opt)
+          ? current.filter((o) => o !== opt)
+          : [...current, opt];
+        return { ...a, personalizacion_multi: next };
+      });
       resetIdleTimer();
     },
     [resetIdleTimer]
@@ -233,10 +415,10 @@ export function QuizModal({
   };
 
   const resetAll = () => {
-    setPhase("welcome");
     setStep(0);
     setAnswers({});
     setSubmitError(null);
+    setSuccess(false);
     partialSent.current = false;
     try {
       localStorage.removeItem(STORAGE_KEY);
@@ -246,28 +428,18 @@ export function QuizModal({
   };
 
   const handleClose = (next: boolean) => {
-    if (!next && phase === "success") {
-      // Cerrar tras éxito → limpiar todo
-      resetAll();
-    }
+    if (!next && success) resetAll();
     onOpenChange(next);
   };
 
-  const startCamino = (c: CaminoQuiz) => {
-    setDirection(1);
-    setPhase(c);
-    setStep(0);
-    setAnswers((a) => ({ ...a, camino: c }));
-  };
-
-  // ─── Submit final ───────────────────────────────────────────
+  /* ─── Submit final ─────────────────────────────────────── */
   const handleSubmit = async () => {
     setSubmitting(true);
     setSubmitError(null);
     try {
       await submitLead({
         ...(answers as QuizAnswers),
-        camino: phase === "B" ? "B" : "A",
+        camino: answers.intencion === "personalizar" ? "A" : "B",
         tipo_envio: "completo",
       });
       try {
@@ -275,14 +447,12 @@ export function QuizModal({
       } catch {
         /* ignore */
       }
-      trackQuizComplete(phase === "B" ? "B" : "A");
+      trackQuizComplete(answers.intencion === "personalizar" ? "A" : "B");
       setDirection(1);
-      setPhase("success");
-      setStep(0);
-      toast.success("Te contactamos en menos de 24 horas.", {
-        description: "Tu reserva de identidad quedó asegurada.",
+      setSuccess(true);
+      toast.success("Te contactamos en menos de 15 minutos.", {
+        description: "Tu sorpresa está a punto de empezar.",
       });
-      // celebrar
       if (!reduced) {
         window.setTimeout(() => balloonsRef.current?.launchAnimation(), 220);
       }
@@ -297,206 +467,89 @@ export function QuizModal({
     }
   };
 
-  // ─── Definición de pasos (Camino A y B) ─────────────────────
-  type StepDef = {
-    title: string;
-    isValid: () => boolean;
-    render: () => React.ReactNode;
+  /* ─── Render del paso activo ──────────────────────────── */
+  const renderStep = (): React.ReactNode => {
+    if (!currentStep) return null;
+    switch (currentStep.key) {
+      case "a_quien":
+        return (
+          <IconGrid
+            options={A_QUIEN}
+            value={answers.a_quien}
+            onChange={(v) => update("a_quien", v)}
+            cols={2}
+          />
+        );
+      case "ocasion":
+        return (
+          <IconGrid
+            options={OCASIONES}
+            value={answers.ocasion}
+            onChange={(v) => update("ocasion", v)}
+            cols={2}
+          />
+        );
+      case "pausa_visual":
+        return (
+          <PausaVisual a={answers.a_quien} o={answers.ocasion} />
+        );
+      case "intencion":
+        return (
+          <IconGrid
+            options={INTENCIONES}
+            value={answers.intencion}
+            onChange={(v) => update("intencion", v as Intencion)}
+            cols={1}
+          />
+        );
+      case "personalizar_galeria":
+        return (
+          <CodigoSelector
+            codigos={pickGallery(answers.a_quien, answers.ocasion, 12)}
+            value={answers.codigo_elegido}
+            onChange={(v) => update("codigo_elegido", v)}
+          />
+        );
+      case "vision_cero":
+        return (
+          <VisionCero
+            descripcion={answers.vision_descripcion}
+            paleta={answers.vision_paleta}
+            onDescripcion={(v) => update("vision_descripcion", v)}
+            onPaleta={(v) => update("vision_paleta", v)}
+          />
+        );
+      case "personalizacion_multi":
+        return (
+          <MultiSelect
+            options={PERSONALIZACION_MULTI}
+            value={answers.personalizacion_multi || []}
+            onToggle={toggleMulti}
+          />
+        );
+      case "fecha_estimada":
+        return (
+          <IconGrid
+            options={FECHAS}
+            value={answers.fecha_estimada}
+            onChange={(v) => update("fecha_estimada", v)}
+            cols={2}
+          />
+        );
+      case "contacto":
+        return (
+          <ContactoForm
+            contacto={answers.contacto}
+            fechaExacta={answers.fecha_exacta}
+            onChangeContacto={updateContacto}
+            onChangeFechaExacta={(v) => update("fecha_exacta", v)}
+            error={submitError}
+          />
+        );
+      default:
+        return null;
+    }
   };
-
-  const stepsA: StepDef[] = [
-    {
-      title: "¿Cuál es el código que te enamoró?",
-      isValid: () => !!answers.codigo_dec,
-      render: () => (
-        <CodigoSelector
-          value={answers.codigo_dec || ""}
-          onChange={(v) => update("codigo_dec", v)}
-        />
-      ),
-    },
-    {
-      title: "¿Para quién es la sorpresa?",
-      isValid: () => !!answers.para_quien,
-      render: () => (
-        <OptionGrid
-          value={answers.para_quien}
-          options={PARA_QUIEN}
-          onChange={(v) => update("para_quien", v)}
-        />
-      ),
-    },
-    {
-      title: "¿Lo dejas tal cual o lo personalizas?",
-      isValid: () => !!answers.personalizacion,
-      render: () => (
-        <OptionGrid
-          value={answers.personalizacion}
-          options={PERSONALIZACION_OPCIONES.map((o) => o.label)}
-          valuesMap={PERSONALIZACION_OPCIONES}
-          onChange={(v) => update("personalizacion", v)}
-        />
-      ),
-    },
-    {
-      title: "¿Qué quieres cambiar?",
-      isValid: () =>
-        answers.personalizacion === "tal_cual" ||
-        (answers.detalle_personalizacion?.trim().length ?? 0) >= 4,
-      render: () =>
-        answers.personalizacion === "tal_cual" ? (
-          <div className="rounded-2xl bg-bb-lime-soft p-6 text-bb-purple">
-            <p className="font-bold mb-1">Perfecto, lo dejamos tal cual.</p>
-            <p className="text-sm text-bb-text/80">
-              Lo replicamos fielmente y te confirmamos en menos de 24h.
-            </p>
-          </div>
-        ) : (
-          <Textarea
-            value={answers.detalle_personalizacion || ""}
-            onChange={(e) => update("detalle_personalizacion", e.target.value)}
-            placeholder="Ej: cambiar los colores a azul y plateado, agregar el nombre, sumar un photo opportunity..."
-            rows={5}
-          />
-        ),
-    },
-    {
-      title: "¿Cuándo es el evento?",
-      isValid: () => !!answers.fecha_evento,
-      render: () => (
-        <FechaPicker
-          value={answers.fecha_evento}
-          onChange={(v) => update("fecha_evento", v)}
-        />
-      ),
-    },
-    {
-      title: "¿Cuál es tu presupuesto aproximado?",
-      isValid: () => !!answers.presupuesto,
-      render: () => (
-        <OptionGrid
-          value={answers.presupuesto}
-          options={PRESUPUESTOS}
-          onChange={(v) => update("presupuesto", v)}
-          cols={2}
-        />
-      ),
-    },
-    {
-      title: "¿Cómo te contactamos?",
-      isValid: () =>
-        (answers.contacto?.nombre?.trim().length ?? 0) >= 2 &&
-        /^\+?\d[\d\s\-]{7,}$/.test(answers.contacto?.telefono ?? ""),
-      render: () => (
-        <ContactoForm
-          contacto={answers.contacto}
-          onChange={updateContacto}
-          error={submitError}
-        />
-      ),
-    },
-  ];
-
-  const stepsB: StepDef[] = [
-    {
-      title: "¿Qué tipo de evento vas a celebrar?",
-      isValid: () => !!answers.tipo_evento,
-      render: () => (
-        <OptionGrid
-          value={answers.tipo_evento}
-          options={TIPOS_EVENTO}
-          onChange={(v) => update("tipo_evento", v)}
-          cols={2}
-        />
-      ),
-    },
-    {
-      title: "¿Para quién es?",
-      isValid: () => !!answers.para_quien,
-      render: () => (
-        <OptionGrid
-          value={answers.para_quien}
-          options={PARA_QUIEN}
-          onChange={(v) => update("para_quien", v)}
-        />
-      ),
-    },
-    {
-      title: "¿Tienes temática definida?",
-      isValid: () => !!answers.tiene_tematica,
-      render: () => (
-        <OptionGrid
-          value={answers.tiene_tematica}
-          options={TIENE_TEMATICA_OPCIONES.map((o) => o.label)}
-          valuesMap={TIENE_TEMATICA_OPCIONES}
-          onChange={(v) => update("tiene_tematica", v)}
-        />
-      ),
-    },
-    {
-      title: "Contanos qué estilo o temática imaginás",
-      isValid: () =>
-        answers.tiene_tematica === "recomendaciones" ||
-        (answers.tematica_detalle?.trim().length ?? 0) >= 4,
-      render: () =>
-        answers.tiene_tematica === "recomendaciones" ? (
-          <div className="rounded-2xl bg-bb-pink-soft p-6 text-bb-purple">
-            <p className="font-bold mb-1">Listo. Nosotros te proponemos.</p>
-            <p className="text-sm text-bb-text/80">
-              En la asesoría te llevamos tres opciones a medida.
-            </p>
-          </div>
-        ) : (
-          <Textarea
-            value={answers.tematica_detalle || ""}
-            onChange={(e) => update("tematica_detalle", e.target.value)}
-            placeholder={tematicaPlaceholder(answers.tipo_evento)}
-            rows={5}
-          />
-        ),
-    },
-    {
-      title: "¿Cuándo es el evento?",
-      isValid: () => !!answers.fecha_evento,
-      render: () => (
-        <FechaPicker
-          value={answers.fecha_evento}
-          onChange={(v) => update("fecha_evento", v)}
-        />
-      ),
-    },
-    {
-      title: "¿Cuál es tu presupuesto aproximado?",
-      isValid: () => !!answers.presupuesto,
-      render: () => (
-        <OptionGrid
-          value={answers.presupuesto}
-          options={PRESUPUESTOS}
-          onChange={(v) => update("presupuesto", v)}
-          cols={2}
-        />
-      ),
-    },
-    {
-      title: "¿Cómo te contactamos?",
-      isValid: () =>
-        (answers.contacto?.nombre?.trim().length ?? 0) >= 2 &&
-        /^\+?\d[\d\s\-]{7,}$/.test(answers.contacto?.telefono ?? ""),
-      render: () => (
-        <ContactoForm
-          contacto={answers.contacto}
-          onChange={updateContacto}
-          error={submitError}
-        />
-      ),
-    },
-  ];
-
-  const currentSteps = phase === "A" ? stepsA : phase === "B" ? stepsB : [];
-  const totalSteps = currentSteps.length;
-  const currentStep = currentSteps[step];
-  const isLastStep = step === totalSteps - 1;
-  const canAdvance = currentStep?.isValid() ?? false;
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
@@ -506,89 +559,96 @@ export function QuizModal({
         </VisuallyHidden.Root>
         <Balloons ref={balloonsRef} />
 
-        {/* WELCOME */}
-        {phase === "welcome" && (
-          <Welcome
-            onPickA={() => startCamino("A")}
-            onPickB={() => startCamino("B")}
-            onMayorista={() => {
-              onOpenChange(false);
-              onRequestMayorista?.();
-            }}
-          />
-        )}
-
-        {/* CAMINO A o B */}
-        {(phase === "A" || phase === "B") && currentStep && (
-          <div>
-            <ProgressBar current={step + 1} total={totalSteps} />
-            <h2 className="mt-6 text-2xl md:text-3xl font-extrabold text-bb-purple leading-tight">
-              {currentStep.title}
-            </h2>
-
-            <div className="relative mt-6 min-h-[260px] overflow-hidden">
-              <AnimatePresence mode="wait" custom={direction} initial={false}>
-                <motion.div
-                  key={step}
-                  custom={direction}
-                  variants={slideVariants}
-                  initial="enter"
-                  animate="center"
-                  exit="exit"
-                  transition={slideTransition}
-                >
-                  {currentStep.render()}
-                </motion.div>
-              </AnimatePresence>
-            </div>
-
-            <div className="mt-8 flex items-center justify-between gap-3">
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={step === 0 ? () => setPhase("welcome") : goBack}
-                disabled={submitting}
-              >
-                <ArrowLeft className="h-4 w-4" />
-                Atrás
-              </Button>
-
-              {isLastStep ? (
-                <Button
-                  type="button"
-                  size="lg"
-                  onClick={handleSubmit}
-                  disabled={!canAdvance || submitting}
-                >
-                  {submitting ? (
-                    <>
-                      <Loader2 className="h-5 w-5 animate-spin" />
-                      Asegurando tu reserva...
-                    </>
-                  ) : (
-                    <>
-                      Asegurar mi reserva de identidad <Sparkles className="h-5 w-5" />
-                    </>
-                  )}
-                </Button>
-              ) : (
-                <Button
-                  type="button"
-                  size="lg"
-                  onClick={goNext}
-                  disabled={!canAdvance}
-                >
-                  Siguiente <ArrowRight className="h-5 w-5" />
-                </Button>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* SUCCESS */}
-        {phase === "success" && (
+        {success ? (
           <PantallaExito onClose={() => handleClose(false)} />
+        ) : (
+          currentStep && (
+            <div>
+              <ProgressBar
+                current={currentStep.progressIndex}
+                total={7}
+              />
+
+              {currentStep.key === "contacto" ? (
+                <>
+                  <h2 className="mt-6 text-2xl md:text-3xl font-extrabold text-bb-purple leading-tight">
+                    {currentStep.title}
+                  </h2>
+                  <p className="mt-1.5 text-sm text-bb-text/65">
+                    Solo 3 datos. Sin email. Sin tarjeta. Respuesta en menos de
+                    15 minutos.
+                  </p>
+                </>
+              ) : currentStep.key === "pausa_visual" ? (
+                <h2 className="mt-6 text-lg md:text-xl font-bold text-bb-purple/85 leading-snug">
+                  {currentStep.title}
+                </h2>
+              ) : (
+                <h2 className="mt-6 text-2xl md:text-3xl font-extrabold text-bb-purple leading-tight">
+                  {currentStep.title}
+                </h2>
+              )}
+
+              <div className="relative mt-6 min-h-[260px] overflow-hidden">
+                <AnimatePresence mode="wait" custom={direction} initial={false}>
+                  <motion.div
+                    key={step}
+                    custom={direction}
+                    variants={slideVariants}
+                    initial="enter"
+                    animate="center"
+                    exit="exit"
+                    transition={slideTransition}
+                  >
+                    {renderStep()}
+                  </motion.div>
+                </AnimatePresence>
+              </div>
+
+              <div className="mt-8 flex items-center justify-between gap-3">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={goBack}
+                  disabled={submitting || step === 0}
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                  Atrás
+                </Button>
+
+                {isLastStep ? (
+                  <Button
+                    type="button"
+                    size="lg"
+                    onClick={handleSubmit}
+                    disabled={!canAdvance || submitting}
+                  >
+                    {submitting ? (
+                      <>
+                        <Loader2 className="h-5 w-5 animate-spin" />
+                        Enviando...
+                      </>
+                    ) : (
+                      <>
+                        Quiero que me contacten — la sorpresa está a punto de
+                        empezar
+                      </>
+                    )}
+                  </Button>
+                ) : (
+                  <Button
+                    type="button"
+                    size="lg"
+                    onClick={goNext}
+                    disabled={!canAdvance}
+                  >
+                    Siguiente <ArrowRight className="h-5 w-5" />
+                  </Button>
+                )}
+              </div>
+            </div>
+          )
         )}
       </DialogContent>
     </Dialog>
@@ -596,74 +656,8 @@ export function QuizModal({
 }
 
 /* ════════════════════════════════════════════════════════════════════
-   Sub-componentes locales
+   Sub-componentes
    ═══════════════════════════════════════════════════════════════════ */
-
-function Welcome({
-  onPickA,
-  onPickB,
-  onMayorista,
-}: {
-  onPickA: () => void;
-  onPickB: () => void;
-  onMayorista: () => void;
-}) {
-  return (
-    <div className="text-center">
-      <span className="inline-flex items-center gap-2 rounded-full bg-bb-pink-soft px-4 py-1.5 text-sm font-bold text-bb-pink">
-        <Sparkles className="h-4 w-4" /> 60 segundos
-      </span>
-      <h2 className="mt-5 text-3xl md:text-4xl font-extrabold text-bb-purple leading-tight">
-        ¿Ya viste un código o decoración que te haya gustado?
-      </h2>
-      <p className="mt-3 text-bb-text/75 max-w-lg mx-auto">
-        Elegí por dónde empezar. Cero compromiso. Te llamamos en menos de 24 horas.
-      </p>
-
-      <div className="mt-8 grid gap-3 sm:grid-cols-2">
-        <button
-          type="button"
-          onClick={onPickA}
-          className="group rounded-3xl bg-bb-pink p-7 text-left text-white shadow-bb-pink transition hover:-translate-y-1"
-        >
-          <span className="text-sm font-bold uppercase tracking-wide opacity-80">
-            Tengo un código en mente
-          </span>
-          <span className="mt-2 block text-2xl font-extrabold leading-tight">
-            Sí, ya vi algo que me enamoró
-          </span>
-          <span className="mt-3 inline-flex items-center gap-1 text-sm font-bold">
-            Continuar <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
-          </span>
-        </button>
-
-        <button
-          type="button"
-          onClick={onPickB}
-          className="group rounded-3xl bg-bb-purple p-7 text-left text-white transition hover:-translate-y-1"
-        >
-          <span className="text-sm font-bold uppercase tracking-wide opacity-80">
-            Empezar de cero
-          </span>
-          <span className="mt-2 block text-2xl font-extrabold leading-tight">
-            Quiero diseñar algo único
-          </span>
-          <span className="mt-3 inline-flex items-center gap-1 text-sm font-bold">
-            Continuar <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
-          </span>
-        </button>
-      </div>
-
-      <button
-        type="button"
-        onClick={onMayorista}
-        className="mt-6 text-sm font-bold text-bb-purple/70 hover:text-bb-pink underline-offset-4 hover:underline"
-      >
-        Soy mayorista o empresa →
-      </button>
-    </div>
-  );
-}
 
 function ProgressBar({ current, total }: { current: number; total: number }) {
   const pct = (current / total) * 100;
@@ -685,39 +679,50 @@ function ProgressBar({ current, total }: { current: number; total: number }) {
   );
 }
 
-function OptionGrid({
-  value,
+function IconGrid({
   options,
+  value,
   onChange,
-  valuesMap,
-  cols = 1,
+  cols = 2,
 }: {
+  options: IconOption[] | IntencionOption[];
   value?: string;
-  options: string[];
   onChange: (v: string) => void;
-  valuesMap?: { value: string; label: string }[];
   cols?: 1 | 2;
 }) {
   return (
     <div className={cn("grid gap-3", cols === 2 ? "sm:grid-cols-2" : "grid-cols-1")}>
       {options.map((opt) => {
-        const internal = valuesMap?.find((m) => m.label === opt)?.value ?? opt;
-        const selected = value === internal;
+        const Icon = opt.icon;
+        const selected = value === opt.value;
         return (
           <button
-            key={opt}
+            key={opt.value}
             type="button"
-            onClick={() => onChange(internal)}
+            onClick={() => onChange(opt.value)}
             aria-pressed={selected}
             className={cn(
-              "w-full rounded-2xl border-2 p-4 text-left font-bold transition-all",
+              "group flex items-center gap-3 rounded-2xl border-2 px-4 py-4 text-left font-bold transition-all",
               "focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-bb-pink/30",
               selected
                 ? "border-bb-pink bg-bb-pink-soft text-bb-purple shadow-bb-pink"
                 : "border-bb-purple/15 bg-white text-bb-text hover:border-bb-pink/60 hover:bg-bb-pink-soft/30"
             )}
           >
-            {opt}
+            <span
+              className={cn(
+                "grid h-10 w-10 shrink-0 place-items-center rounded-xl transition-colors",
+                selected
+                  ? "bg-bb-pink text-white"
+                  : "bg-bb-pink-soft text-bb-pink group-hover:bg-bb-pink group-hover:text-white"
+              )}
+            >
+              <Icon className="h-5 w-5" strokeWidth={2.2} aria-hidden />
+            </span>
+            <span className="flex-1">{opt.label}</span>
+            {selected && (
+              <Check className="h-5 w-5 text-bb-pink" aria-hidden />
+            )}
           </button>
         );
       })}
@@ -725,76 +730,136 @@ function OptionGrid({
   );
 }
 
+function PausaVisual({ a, o }: { a?: string; o?: string }) {
+  const gallery = React.useMemo(() => pickGallery(a, o, 6), [a, o]);
+  return (
+    <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
+      {gallery.map((c) => (
+        <div
+          key={c.codigo}
+          className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-gradient-to-br from-bb-pink-soft to-bb-purple-soft/30 shadow-bb-soft"
+        >
+          <Image
+            src={c.img}
+            alt={c.titulo}
+            fill
+            sizes="(min-width:768px) 33vw, 50vw"
+            className="object-cover"
+            unoptimized
+          />
+          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-bb-purple/95 to-transparent p-2">
+            <p className="text-xs font-bold text-white">{c.titulo}</p>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function CodigoSelector({
+  codigos,
   value,
   onChange,
 }: {
-  value: string;
+  codigos: CodigoDec[];
+  value?: string;
   onChange: (v: string) => void;
 }) {
-  const [search, setSearch] = React.useState(value);
-  React.useEffect(() => setSearch(value), [value]);
-
-  const selected: CodigoDec | undefined = CODIGOS_DEC.find(
-    (c) => c.codigo.toLowerCase() === value.toLowerCase()
-  );
-
   return (
-    <div className="space-y-4">
-      <div>
-        <Label htmlFor="codigo-input">Escribí el código (ej. DEC-005)</Label>
-        <Input
-          id="codigo-input"
-          value={search}
-          onChange={(e) => {
-            setSearch(e.target.value);
-            onChange(e.target.value.toUpperCase().trim());
-          }}
-          placeholder="DEC-..."
-          autoComplete="off"
-          className="mt-1.5"
-        />
-        {selected && (
-          <p className="mt-2 text-sm text-bb-purple">
-            <strong>{selected.titulo}</strong> · {CATEGORIA_LABEL[selected.categoria]} · {selected.emocion}
-          </p>
-        )}
-      </div>
+    <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
+      {codigos.map((c) => {
+        const selected = value === c.codigo;
+        return (
+          <button
+            key={c.codigo}
+            type="button"
+            onClick={() => onChange(c.codigo)}
+            aria-pressed={selected}
+            className={cn(
+              "group relative overflow-hidden rounded-2xl border-2 text-left transition-all",
+              "focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-bb-pink/30",
+              selected
+                ? "border-bb-pink shadow-bb-pink"
+                : "border-bb-purple/10 hover:border-bb-pink/60"
+            )}
+          >
+            <div className="relative aspect-[4/5] w-full bg-gradient-to-br from-bb-pink-soft to-bb-purple-soft/30">
+              <Image
+                src={c.img}
+                alt={c.titulo}
+                fill
+                sizes="(min-width:768px) 33vw, 50vw"
+                className="object-cover transition-transform duration-500 group-hover:scale-105"
+                unoptimized
+              />
+              {selected && (
+                <span className="absolute right-2 top-2 grid h-7 w-7 place-items-center rounded-full bg-bb-pink text-white shadow-lg">
+                  <Check className="h-4 w-4" strokeWidth={2.6} />
+                </span>
+              )}
+            </div>
+            <div className="p-3">
+              <p className="text-[10px] font-bold text-bb-pink">{c.codigo}</p>
+              <p className="text-sm font-extrabold text-bb-purple leading-tight">
+                {c.titulo}
+              </p>
+            </div>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
 
+function VisionCero({
+  descripcion,
+  paleta,
+  onDescripcion,
+  onPaleta,
+}: {
+  descripcion?: string;
+  paleta?: string;
+  onDescripcion: (v: string) => void;
+  onPaleta: (v: string) => void;
+}) {
+  return (
+    <div className="space-y-5">
+      <Textarea
+        value={descripcion || ""}
+        onChange={(e) => onDescripcion(e.target.value)}
+        placeholder="Ej: ambiente romántico con luces cálidas, una palabra clave en el centro, mensaje personalizado…"
+        rows={4}
+      />
       <div>
-        <p className="mb-2 text-xs font-bold uppercase tracking-wide text-bb-purple/70">
-          O elegí desde la galería
-        </p>
-        <div className="flex gap-3 overflow-x-auto pb-3 -mx-1 px-1 snap-x snap-mandatory">
-          {CODIGOS_DEC.slice(0, 24).map((c) => {
-            const isSel = c.codigo === value;
+        <Label className="text-sm font-bold text-bb-purple">
+          Paleta de colores
+        </Label>
+        <div className="mt-2 grid grid-cols-2 gap-2.5 md:grid-cols-4">
+          {PALETAS.map((p) => {
+            const selected = paleta === p.value;
             return (
               <button
-                key={c.codigo}
+                key={p.value}
                 type="button"
-                onClick={() => onChange(c.codigo)}
-                aria-pressed={isSel}
+                onClick={() => onPaleta(p.value)}
+                aria-pressed={selected}
                 className={cn(
-                  "snap-start shrink-0 w-32 overflow-hidden rounded-2xl border-2 transition-all text-left",
-                  isSel
+                  "rounded-2xl border-2 p-2 text-left transition-all",
+                  "focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-bb-pink/30",
+                  selected
                     ? "border-bb-pink shadow-bb-pink"
-                    : "border-bb-purple/10 hover:border-bb-pink/40"
+                    : "border-bb-purple/10 hover:border-bb-pink/60"
                 )}
               >
-                <div className="relative h-20 w-full bg-gradient-to-br from-bb-pink-soft to-bb-purple-soft/40">
-                  <Image
-                    src={c.img}
-                    alt={c.titulo}
-                    fill
-                    sizes="128px"
-                    className="object-cover"
-                    unoptimized
-                  />
-                </div>
-                <div className="p-2">
-                  <p className="text-[10px] font-bold text-bb-pink">{c.codigo}</p>
-                  <p className="truncate text-xs font-bold text-bb-purple">{c.titulo}</p>
-                </div>
+                <div
+                  className="h-10 w-full rounded-lg"
+                  style={{
+                    background: `linear-gradient(135deg, ${p.from}, ${p.to})`,
+                  }}
+                />
+                <p className="mt-2 text-xs font-bold text-bb-purple">
+                  {p.label}
+                </p>
               </button>
             );
           })}
@@ -804,90 +869,105 @@ function CodigoSelector({
   );
 }
 
-function FechaPicker({
+function MultiSelect({
+  options,
   value,
-  onChange,
+  onToggle,
 }: {
-  value?: string;
-  onChange: (v: string) => void;
+  options: string[];
+  value: string[];
+  onToggle: (opt: string) => void;
 }) {
-  const today = new Date().toISOString().slice(0, 10);
-  const sinFecha = value === "sin_definir";
   return (
-    <div className="space-y-3">
-      <Input
-        type="date"
-        value={sinFecha ? "" : value || ""}
-        min={today}
-        onChange={(e) => onChange(e.target.value)}
-        disabled={sinFecha}
-      />
-      <button
-        type="button"
-        onClick={() => onChange(sinFecha ? "" : "sin_definir")}
-        className={cn(
-          "text-sm font-bold underline-offset-4 hover:underline",
-          sinFecha ? "text-bb-pink" : "text-bb-purple/70 hover:text-bb-pink"
-        )}
-      >
-        {sinFecha ? "Quitar selección" : "No tengo fecha definida"}
-      </button>
+    <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+      {options.map((opt) => {
+        const selected = value.includes(opt);
+        return (
+          <button
+            key={opt}
+            type="button"
+            onClick={() => onToggle(opt)}
+            aria-pressed={selected}
+            className={cn(
+              "flex items-center gap-3 rounded-2xl border-2 px-4 py-3.5 text-left font-bold transition-all",
+              "focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-bb-pink/30",
+              selected
+                ? "border-bb-pink bg-bb-pink-soft text-bb-purple shadow-bb-pink"
+                : "border-bb-purple/15 bg-white text-bb-text hover:border-bb-pink/60 hover:bg-bb-pink-soft/30"
+            )}
+          >
+            <span
+              className={cn(
+                "grid h-6 w-6 shrink-0 place-items-center rounded-md border-2",
+                selected
+                  ? "border-bb-pink bg-bb-pink text-white"
+                  : "border-bb-purple/25"
+              )}
+            >
+              {selected && <Check className="h-4 w-4" strokeWidth={3} />}
+            </span>
+            <span className="flex-1">{opt}</span>
+          </button>
+        );
+      })}
     </div>
   );
 }
 
 function ContactoForm({
   contacto,
-  onChange,
+  fechaExacta,
+  onChangeContacto,
+  onChangeFechaExacta,
   error,
 }: {
   contacto?: QuizAnswers["contacto"];
-  onChange: (p: Partial<NonNullable<QuizAnswers["contacto"]>>) => void;
+  fechaExacta?: string;
+  onChangeContacto: (p: Partial<NonNullable<QuizAnswers["contacto"]>>) => void;
+  onChangeFechaExacta: (v: string) => void;
   error?: string | null;
 }) {
-  const fieldClass =
-    "group/field grid gap-1.5 has-[:focus]:[&_label]:-translate-y-0.5 has-[:focus]:[&_label]:text-bb-pink";
-  const labelClass = "transition-all duration-200";
-
+  const today = new Date().toISOString().slice(0, 10);
   return (
     <div className="grid gap-4">
-      <div className={fieldClass}>
-        <Label htmlFor="q-nombre" className={labelClass}>
-          Nombre completo *
-        </Label>
+      <div className="grid gap-1.5">
+        <Label htmlFor="q-nombre">Nombre completo *</Label>
         <Input
           id="q-nombre"
           value={contacto?.nombre || ""}
-          onChange={(e) => onChange({ nombre: e.target.value })}
+          onChange={(e) => onChangeContacto({ nombre: e.target.value })}
           placeholder="Ej. Andrea Restrepo"
           autoComplete="name"
         />
       </div>
-      <div className={fieldClass}>
-        <Label htmlFor="q-tel" className={labelClass}>
-          WhatsApp (con código de país) *
-        </Label>
-        <Input
-          id="q-tel"
-          type="tel"
-          value={contacto?.telefono || ""}
-          onChange={(e) => onChange({ telefono: e.target.value })}
-          placeholder="+57 301 318 2266"
-          autoComplete="tel"
-          inputMode="tel"
-        />
+      <div className="grid gap-1.5">
+        <Label htmlFor="q-tel">WhatsApp *</Label>
+        <div className="flex gap-2">
+          <span className="grid place-items-center rounded-2xl bg-bb-pink-soft px-3 text-bb-purple font-bold">
+            +57
+          </span>
+          <Input
+            id="q-tel"
+            type="tel"
+            value={contacto?.telefono || ""}
+            onChange={(e) => onChangeContacto({ telefono: e.target.value })}
+            placeholder="301 318 2266"
+            autoComplete="tel"
+            inputMode="tel"
+            className="flex-1"
+          />
+        </div>
       </div>
-      <div className={fieldClass}>
-        <Label htmlFor="q-email" className={labelClass}>
-          Email (opcional)
+      <div className="grid gap-1.5">
+        <Label htmlFor="q-fecha-exacta">
+          Fecha exacta del evento (opcional)
         </Label>
         <Input
-          id="q-email"
-          type="email"
-          value={contacto?.email || ""}
-          onChange={(e) => onChange({ email: e.target.value })}
-          placeholder="andrea@correo.com"
-          autoComplete="email"
+          id="q-fecha-exacta"
+          type="date"
+          value={fechaExacta || ""}
+          min={today}
+          onChange={(e) => onChangeFechaExacta(e.target.value)}
         />
       </div>
       {error && (
@@ -896,7 +976,8 @@ function ContactoForm({
         </p>
       )}
       <p className="text-xs text-bb-text/60">
-        Tus datos se usan exclusivamente para coordinar tu asesoría. No spam.
+        Tus datos se usan solo para coordinar tu sorpresa. No spam, no email,
+        sin tarjeta.
       </p>
     </div>
   );
@@ -904,18 +985,19 @@ function ContactoForm({
 
 function PantallaExito({ onClose }: { onClose: () => void }) {
   const igUrl =
-    process.env.NEXT_PUBLIC_INSTAGRAM_URL || "https://www.instagram.com/tiendas_big_bang/";
+    process.env.NEXT_PUBLIC_INSTAGRAM_URL ||
+    "https://www.instagram.com/tiendas_big_bang/";
   return (
     <div className="text-center py-2">
       <span className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-bb-lime text-bb-purple">
         <PartyPopper className="h-9 w-9" />
       </span>
       <h2 className="mt-5 text-3xl md:text-4xl font-extrabold text-bb-purple leading-tight">
-        ¡Listo! Eres oficialmente el próximo anfitrión inolvidable
+        ¡Listo! Esa sorpresa está a punto de empezar.
       </h2>
       <p className="mt-4 text-base md:text-lg text-bb-text/80 max-w-xl mx-auto">
-        En menos de 24 horas un asesor te contacta por WhatsApp. Mientras tanto,
-        seguinos en Instagram para inspirarte con montajes reales.
+        En menos de 15 minutos un asesor te contacta por WhatsApp. Mientras
+        tanto, seguinos en Instagram para inspirarte con montajes reales.
       </p>
 
       <div className="mt-7 flex flex-col sm:flex-row items-center justify-center gap-3">
@@ -930,16 +1012,4 @@ function PantallaExito({ onClose }: { onClose: () => void }) {
       </div>
     </div>
   );
-}
-
-function tematicaPlaceholder(tipo?: string): string {
-  if (!tipo) return "Contanos qué imaginás...";
-  if (tipo.includes("infantil")) return "Ej: temática unicornios con tonos pastel y mucho rosa";
-  if (tipo.includes("adulto")) return "Ej: cumpleaños 30 negro y dorado, vibe sofisticado";
-  if (tipo.includes("Baby")) return "Ej: nube de algodón, tonos pastel, osito como protagonista";
-  if (tipo.includes("Bautizo")) return "Ej: blanco y dorado, paloma central, ambiente sereno";
-  if (tipo.includes("Grado")) return "Ej: birrete dorado sobre fondo oscuro, frase del programa";
-  if (tipo.includes("Aniversario")) return "Ej: 25 años juntos, rojos y dorados, foto del primer viaje";
-  if (tipo.includes("empresarial")) return "Ej: lanzamiento de producto tech, paleta corporativa";
-  return "Contanos qué imaginás...";
 }

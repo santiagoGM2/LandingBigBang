@@ -18,53 +18,54 @@ interface Props {
 const NOISE_URL =
   "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.06 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>\")";
 
-function nextMondayMidnight(): Date {
-  const now = new Date();
-  const result = new Date(now);
-  const day = now.getDay(); // 0=dom, 1=lun
-  const daysUntil = day === 1 ? 7 : (8 - day) % 7;
-  result.setDate(now.getDate() + daysUntil);
-  result.setHours(0, 0, 0, 0);
-  return result;
-}
-
 interface Countdown {
-  d: number;
   h: number;
   m: number;
   s: number;
-  /** En el último día mostramos segundos */
-  useSeconds: boolean;
 }
+
+/** Rolling deadline persistido en sessionStorage: 1 hora desde la primera
+ *  visita del visitante a la página. Sobrevive refresh, se reinicia al cerrar
+ *  pestaña. */
+const STORAGE_KEY = "bb-escasez-deadline";
+const WINDOW_MS = 60 * 60 * 1000;
 
 function useCountdown(): Countdown | null {
   const [diff, setDiff] = React.useState<Countdown | null>(null);
 
   React.useEffect(() => {
-    const target = nextMondayMidnight().getTime();
-    let timeoutId: ReturnType<typeof setTimeout> | undefined;
+    let deadline: number;
+    try {
+      const stored = sessionStorage.getItem(STORAGE_KEY);
+      const parsed = stored ? parseInt(stored, 10) : NaN;
+      if (Number.isFinite(parsed) && parsed > Date.now()) {
+        deadline = parsed;
+      } else {
+        deadline = Date.now() + WINDOW_MS;
+        sessionStorage.setItem(STORAGE_KEY, String(deadline));
+      }
+    } catch {
+      deadline = Date.now() + WINDOW_MS;
+    }
 
+    let intervalId: ReturnType<typeof setInterval> | undefined;
     const tick = () => {
-      const ms = target - Date.now();
+      const ms = deadline - Date.now();
       if (ms <= 0) {
-        setDiff({ d: 0, h: 0, m: 0, s: 0, useSeconds: false });
+        setDiff({ h: 0, m: 0, s: 0 });
+        if (intervalId) clearInterval(intervalId);
         return;
       }
-      const d = Math.floor(ms / 86_400_000);
-      const h = Math.floor((ms % 86_400_000) / 3_600_000);
+      const h = Math.floor(ms / 3_600_000);
       const m = Math.floor((ms % 3_600_000) / 60_000);
       const s = Math.floor((ms % 60_000) / 1_000);
-      const useSeconds = d === 0;
-      setDiff({ d, h, m, s, useSeconds });
-
-      // Tick cada segundo en último día, cada minuto en otros casos
-      const next = useSeconds ? 1000 : 60_000;
-      timeoutId = setTimeout(tick, next);
+      setDiff({ h, m, s });
     };
 
     tick();
+    intervalId = setInterval(tick, 1000);
     return () => {
-      if (timeoutId) clearTimeout(timeoutId);
+      if (intervalId) clearInterval(intervalId);
     };
   }, []);
 
@@ -120,19 +121,15 @@ export function Escasez({ cuposOcupados = 2, cuposTotal = 3 }: Props) {
             {cd && (
               <p className="mt-6 inline-flex items-center gap-1.5 text-sm font-bold text-bb-lime">
                 Cierra en
-                {cd.useSeconds ? (
-                  <>
-                    <span className="rounded-md bg-white/10 px-2 py-1 text-white tabular-nums">{cd.h}h</span>
-                    <span className="rounded-md bg-white/10 px-2 py-1 text-white tabular-nums">{cd.m}m</span>
-                    <span className="rounded-md bg-white/10 px-2 py-1 text-white tabular-nums">{cd.s}s</span>
-                  </>
-                ) : (
-                  <>
-                    <span className="rounded-md bg-white/10 px-2 py-1 text-white tabular-nums">{cd.d}d</span>
-                    <span className="rounded-md bg-white/10 px-2 py-1 text-white tabular-nums">{cd.h}h</span>
-                    <span className="rounded-md bg-white/10 px-2 py-1 text-white tabular-nums">{cd.m}m</span>
-                  </>
-                )}
+                <span className="rounded-md bg-white/10 px-2 py-1 text-white tabular-nums">
+                  {String(cd.h).padStart(2, "0")}h
+                </span>
+                <span className="rounded-md bg-white/10 px-2 py-1 text-white tabular-nums">
+                  {String(cd.m).padStart(2, "0")}m
+                </span>
+                <span className="rounded-md bg-white/10 px-2 py-1 text-white tabular-nums">
+                  {String(cd.s).padStart(2, "0")}s
+                </span>
               </p>
             )}
           </div>

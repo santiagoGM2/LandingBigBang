@@ -3,16 +3,16 @@
 import * as React from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import {
-  PartyPopper,
+  Heart,
   Cake,
   Baby,
   Sparkles,
-  Church,
   GraduationCap,
-  Heart,
-  Briefcase,
-  MoreHorizontal,
-  CheckCircle2,
+  Gift,
+  MessageCircle,
+  Target,
+  MapPin,
+  CreditCard,
   ArrowRight,
   type LucideIcon,
 } from "lucide-react";
@@ -21,28 +21,33 @@ import { useQuiz } from "@/components/quiz/QuizProvider";
 import { useHasMounted } from "@/lib/use-has-mounted";
 import { cn } from "@/lib/utils";
 
-interface EventoOption {
+interface OcasionOption {
   value: string;
   label: string;
   icon: LucideIcon;
 }
 
-const EVENTOS: EventoOption[] = [
-  { value: "Cumpleaños infantil", label: "Cumpleaños infantil", icon: PartyPopper },
-  { value: "Cumpleaños de adulto", label: "Cumpleaños adulto", icon: Cake },
-  { value: "Baby shower", label: "Baby shower", icon: Baby },
-  { value: "Gender reveal", label: "Gender reveal", icon: Sparkles },
-  { value: "Bautizo o primera comunión", label: "Bautizo o comunión", icon: Church },
-  { value: "Grado", label: "Grado", icon: GraduationCap },
-  { value: "Aniversario", label: "Aniversario", icon: Heart },
-  { value: "Evento empresarial", label: "Evento empresarial", icon: Briefcase },
-  { value: "Otro", label: "Otro", icon: MoreHorizontal },
+const OCASIONES: OcasionOption[] = [
+  { value: "Su cumpleaños", label: "Su cumpleaños", icon: Cake },
+  { value: "Nuestro aniversario", label: "Nuestro aniversario", icon: Heart },
+  { value: "Está esperando un bebé", label: "Está esperando un bebé", icon: Baby },
+  { value: "Se acaba de graduar", label: "Se acaba de graduar", icon: GraduationCap },
+  { value: "Sorpresa sin motivo", label: "Quiero sorprenderla sin motivo", icon: Gift },
+  { value: "Otra ocasión especial", label: "Otra ocasión especial", icon: Sparkles },
 ];
 
-const BULLETS = [
-  "Diseñamos a tu medida, no de catálogo",
-  "Cobertura en toda Cali",
-  "Sin pago adelantado para confirmar",
+interface Bullet {
+  icon: LucideIcon;
+  text: string;
+}
+
+const BULLETS: Bullet[] = [
+  {
+    icon: Target,
+    text: "Diseñado exactamente para la persona que quieres sorprender",
+  },
+  { icon: MapPin, text: "Entrega en tu puerta o recoge en tienda — tú decides" },
+  { icon: CreditCard, text: "Sin pago adelantado para reservar tu fecha" },
 ];
 
 export function QuizInline() {
@@ -51,8 +56,8 @@ export function QuizInline() {
   const mounted = useHasMounted();
   const animate = mounted && !reduced;
 
-  const handlePick = (tipo_evento: string) => {
-    openInline({ tipo_evento, camino: "B" });
+  const handlePick = (ocasion: string) => {
+    openInline({ ocasion });
   };
 
   return (
@@ -62,28 +67,32 @@ export function QuizInline() {
           {/* ─── Columna copy ─────────────────────────────────────── */}
           <div className="lg:pt-6">
             <span className="inline-flex items-center gap-2 rounded-full bg-bb-pink px-3 py-1 text-xs font-bold uppercase tracking-wide text-white">
-              <Sparkles className="h-3.5 w-3.5" /> Empezá ahora
+              <Sparkles className="h-3.5 w-3.5" /> 60 segundos
             </span>
             <h2 className="mt-5 text-3xl md:text-5xl font-extrabold leading-[1.05] text-bb-purple">
-              Tu próxima gran sorpresa empieza con un click
+              Esa persona todavía no sabe lo que le espera
             </h2>
             <p className="mt-5 text-lg leading-relaxed text-bb-text/80">
-              60 segundos. 7 preguntas. Cero compromiso. Te contactamos en
-              menos de 24 horas.
+              60 segundos. 7 preguntas. Y nosotros nos encargamos del resto.
             </p>
 
             <ul className="mt-7 space-y-3 text-bb-text">
-              {BULLETS.map((b) => (
-                <li key={b} className="flex items-start gap-2.5">
-                  <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-bb-lime" />
-                  <span className="font-bold text-bb-purple/90">{b}</span>
-                </li>
-              ))}
+              {BULLETS.map((b) => {
+                const Icon = b.icon;
+                return (
+                  <li key={b.text} className="flex items-start gap-2.5">
+                    <span className="mt-0.5 inline-grid h-7 w-7 shrink-0 place-items-center rounded-full bg-bb-lime-soft text-bb-purple">
+                      <Icon className="h-4 w-4" strokeWidth={2.4} />
+                    </span>
+                    <span className="font-bold text-bb-purple/90">{b.text}</span>
+                  </li>
+                );
+              })}
             </ul>
 
-            <p className="mt-9 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-bb-purple/60">
-              <ArrowRight className="h-3.5 w-3.5 text-bb-pink" aria-hidden />
-              Tu primera elección es ese botón
+            <p className="mt-7 text-sm text-bb-text/65 leading-relaxed">
+              No te pedimos tarjeta. No te pedimos email. Solo cuéntanos a quién
+              quieres dejar sin palabras.
             </p>
           </div>
 
@@ -100,18 +109,18 @@ export function QuizInline() {
           >
             <div className="flex items-center gap-2">
               <span className="text-xs font-bold uppercase tracking-wide text-bb-purple/60">
-                Paso 1 de 7
+                Paso 2 de 7
               </span>
               <div className="relative h-1.5 flex-1 overflow-hidden rounded-full bg-bb-pink-soft">
-                <div className="h-full w-[14%] rounded-full bg-bb-pink" />
+                <div className="h-full w-[28%] rounded-full bg-bb-pink" />
               </div>
             </div>
 
             <h3 className="mt-5 text-2xl md:text-3xl font-extrabold text-bb-purple leading-tight">
-              ¿Qué tipo de evento vas a celebrar?
+              ¿Qué está a punto de vivir esa persona?
             </h3>
             <p className="mt-1.5 text-sm text-bb-text/65">
-              Elegí uno y seguimos con el resto en un mini quiz de 60s.
+              Elegí una y seguimos con el resto en un mini quiz de 60s.
             </p>
 
             <motion.div
@@ -124,13 +133,13 @@ export function QuizInline() {
                   transition: { staggerChildren: 0.05, delayChildren: 0.1 },
                 },
               }}
-              className="mt-6 grid grid-cols-2 gap-2.5 md:grid-cols-3"
+              className="mt-6 grid grid-cols-1 gap-2.5 md:grid-cols-2"
             >
-              {EVENTOS.map((e) => {
-                const Icon = e.icon;
+              {OCASIONES.map((o) => {
+                const Icon = o.icon;
                 return (
                   <motion.button
-                    key={e.value}
+                    key={o.value}
                     variants={
                       animate
                         ? {
@@ -141,7 +150,7 @@ export function QuizInline() {
                     }
                     whileTap={animate ? { scale: 0.97 } : undefined}
                     type="button"
-                    onClick={() => handlePick(e.value)}
+                    onClick={() => handlePick(o.value)}
                     className={cn(
                       "group flex items-center gap-2.5 rounded-2xl border-2 border-bb-purple/12 bg-white px-3 py-3.5",
                       "text-left font-bold text-bb-purple text-sm md:text-[15px] leading-tight",
@@ -153,7 +162,7 @@ export function QuizInline() {
                     <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-bb-pink-soft text-bb-pink transition-colors group-hover:bg-bb-pink group-hover:text-white">
                       <Icon className="h-[18px] w-[18px]" strokeWidth={2.2} aria-hidden />
                     </span>
-                    <span className="flex-1">{e.label}</span>
+                    <span className="flex-1">{o.label}</span>
                     <ArrowRight
                       className="h-4 w-4 shrink-0 text-bb-purple/30 transition-all group-hover:translate-x-0.5 group-hover:text-bb-pink"
                       aria-hidden
@@ -163,8 +172,11 @@ export function QuizInline() {
               })}
             </motion.div>
 
-            <p className="mt-5 text-xs text-bb-text/55">
-              No te pedimos email para empezar. Solo WhatsApp al final del quiz.
+            <p className="mt-5 text-xs font-bold uppercase tracking-wide text-bb-pink">
+              Empezar a diseñar su sorpresa →
+            </p>
+            <p className="mt-1.5 text-xs text-bb-text/55">
+              Gratis · Sin compromiso · Respuesta en menos de 15 minutos
             </p>
           </motion.div>
         </div>

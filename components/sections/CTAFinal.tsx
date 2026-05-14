@@ -126,7 +126,7 @@ export function CTAFinal() {
           transition={{ duration: 0.7 }}
           className="text-4xl md:text-6xl lg:text-7xl font-extrabold leading-[1.05]"
         >
-          Tu próxima gran historia empieza con un click
+          Esa persona todavía no sabe lo que se viene.
         </motion.h2>
         <motion.p
           initial={animate ? { opacity: 0, y: 18 } : false}
@@ -135,8 +135,8 @@ export function CTAFinal() {
           transition={{ delay: 0.2, duration: 0.6 }}
           className="mt-6 text-lg md:text-xl text-white/90 max-w-2xl mx-auto"
         >
-          60 segundos. Quiz interactivo. Cero compromiso. Te contactamos en
-          menos de 24 horas.
+          60 segundos. 7 preguntas. Y nosotros nos encargamos de que cuando
+          abra esa puerta, no pueda contener las lágrimas.
         </motion.p>
 
         <motion.div
@@ -173,10 +173,13 @@ export function CTAFinal() {
               )}
             >
               <Sparkles className="h-6 w-6 transition-transform group-hover:rotate-12" />
-              Empezar mi quiz ahora
+              Crear esa sorpresa ahora →
             </motion.button>
             <BorderBeam duration={3.5} colorFrom="#FFFFFF" colorTo="#7DC720" />
           </div>
+          <p className="mt-4 text-sm md:text-base text-white/80">
+            Gratis · Sin compromiso · Te respondemos en menos de 15 minutos
+          </p>
         </motion.div>
       </div>
     </section>

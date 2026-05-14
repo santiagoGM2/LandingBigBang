@@ -21,10 +21,10 @@ const TESTIMONIOS: Testimonial[] = [
   },
   {
     id: 2,
-    name: "Andrea, novia de Carlos",
+    name: "Andrea, pareja de Carlos",
     avatar: "https://randomuser.me/api/portraits/women/55.jpg",
     description:
-      "Quería sorprenderlo en nuestro aniversario y no sabía cómo. Les mandé el código DEC-039, contesté el quiz y a los 20 minutos ya estaban diseñando algo único. Carlos todavía habla de esa noche.",
+      "Quería sorprender a mi pareja en nuestro aniversario y no sabía cómo. Les mandé el código DEC-039, contesté el quiz y a los 20 minutos ya estaban diseñando algo único. Carlos todavía habla de esa noche.",
   },
   {
     id: 3,

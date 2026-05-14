@@ -6,19 +6,49 @@
 
 export type CaminoQuiz = "A" | "B";
 
+/** Intención del paso 3 del nuevo funnel — define la bifurcación del quiz */
+export type Intencion =
+  | "personalizar"
+  | "cero"
+  | "sorprendeme"
+  | "asesoria";
+
 export interface QuizAnswers {
+  /** Camino derivado para back-compat con analytics existentes */
   camino: CaminoQuiz;
-  /** Camino A: código DEC pre-elegido */
+
+  /* ─── Funnel v2 (Phase O) ─────────────────────────────── */
+  /** Paso 1: a quién va dirigida la sorpresa */
+  a_quien?: string;
+  /** Paso 2: ocasión que está a punto de vivir */
+  ocasion?: string;
+  /** Pre-selección desde ConexionEmocional cards */
+  emocion?: string;
+  /** Paso 3: intención de compra (bifurcación) */
+  intencion?: Intencion;
+  /** Paso 4 A: código DEC elegido en galería */
+  codigo_elegido?: string;
+  /** Paso 4 B: visión libre desde cero */
+  vision_descripcion?: string;
+  vision_paleta?: string;
+  /** Paso 5: multiselect de personalización */
+  personalizacion_multi?: string[];
+  /** Paso 6: ventana de fecha estimada */
+  fecha_estimada?: string;
+  /** Paso 7: fecha exacta opcional del evento */
+  fecha_exacta?: string;
+
+  /* ─── Campos legacy (v1) — mantenidos opcionales por back-compat ─── */
   codigo_dec?: string;
-  /** Camino B: tipo de evento elegido */
   tipo_evento?: string;
-  para_quien: string;
+  para_quien?: string;
   tiene_tematica?: string;
   tematica_detalle?: string;
   personalizacion?: string;
   detalle_personalizacion?: string;
   fecha_evento?: string;
   presupuesto?: string;
+
   contacto: {
     nombre: string;
     telefono: string;

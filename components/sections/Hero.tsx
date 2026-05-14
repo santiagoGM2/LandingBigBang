@@ -34,8 +34,8 @@ const IMAGES: Array<{ id: string; alt: string }> = [
 
 const TAGLINE = "Decoraciones que se convierten en recuerdos";
 const DESCRIPTION =
-  "Convierte un día común en el hito más importante de su año.";
-const CTA_TEXT = "Ser el autor de esta sorpresa";
+  "No es el presupuesto. Es saber exactamente qué hace que un momento se grabe para siempre.";
+const CTA_TEXT = "Diseñar mi sorpresa ahora →";
 
 export function Hero() {
   const { open } = useQuiz();
@@ -99,10 +99,10 @@ export function Hero() {
         </span>
 
         {/* Title — color bb-text con keyword en bb-pink */}
-        <h1 className="mt-7 max-w-4xl text-4xl font-extrabold leading-[1.05] text-bb-text md:text-6xl lg:text-7xl">
-          ¿Qué dirán de ti cuando
-          <br className="hidden md:inline" />{" "}
-          <span className="text-bb-pink">abran esa puerta?</span>
+        <h1 className="mt-7 max-w-5xl text-3xl font-extrabold leading-[1.1] text-bb-text md:text-5xl lg:text-6xl">
+          ¿Por qué algunas personas se convierten en el{" "}
+          <span className="text-bb-pink">héroe de la familia</span> con una sola
+          sorpresa… y otras gastan el doble y nadie recuerda nada?
         </h1>
 
         <p className="mt-6 max-w-2xl text-lg leading-relaxed text-bb-text/70 md:text-xl">

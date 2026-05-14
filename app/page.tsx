@@ -12,7 +12,6 @@ import { ComoFunciona } from "@/components/sections/ComoFunciona";
 import { CategoriasNavegables } from "@/components/sections/CategoriasNavegables";
 import { Testimonios } from "@/components/sections/Testimonios";
 import { Escasez } from "@/components/sections/Escasez";
-import { Mayoristas } from "@/components/sections/Mayoristas";
 import { FAQ } from "@/components/sections/FAQ";
 import { CTAFinal } from "@/components/sections/CTAFinal";
 import { Footer } from "@/components/sections/Footer";
@@ -33,7 +32,6 @@ export default function Page() {
         <CategoriasNavegables />
         <Testimonios />
         <Escasez cuposOcupados={2} cuposTotal={3} />
-        <Mayoristas />
         <FAQ />
         <CTAFinal />
       </main>

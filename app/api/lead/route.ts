@@ -7,30 +7,37 @@ interface GhlPayload {
   nombre: string;
   telefono: string;
   email: string;
-  tipo_evento: string;
-  para_quien: string;
-  tiene_tematica: string;
-  tematica_detalle: string;
-  fecha_evento: string;
-  presupuesto: string;
+  a_quien: string;
+  ocasion: string;
+  emocion: string;
+  intencion: string;
+  codigo_elegido: string;
+  vision_descripcion: string;
+  vision_paleta: string;
+  personalizacion: string;
+  fecha_estimada: string;
+  fecha_exacta: string;
   resumen_quiz: string;
-  source: "landing_big_bang";
+  source: "landing_big_bang_funnel_v2";
 }
 
 function buildResumen(a: QuizAnswers): string {
   const lines = [
-    a.camino === "A"
-      ? `Camino: Con codigo DEC ${a.codigo_dec || "(no especificado)"}`
-      : `Camino: Desde cero`,
-    `Evento: ${a.tipo_evento || (a.codigo_dec ? "Con codigo DEC" : "Sin definir")}`,
-    `Para quien: ${a.para_quien}`,
-    a.tiene_tematica ? `Tematica: ${a.tiene_tematica}` : "",
-    a.tematica_detalle ? `Detalle: ${a.tematica_detalle}` : "",
-    a.personalizacion ? `Personalizacion: ${a.personalizacion}` : "",
-    a.detalle_personalizacion ? `Detalle personalizacion: ${a.detalle_personalizacion}` : "",
-    `Fecha: ${a.fecha_evento || "Sin definir"}`,
-    `Presupuesto: ${a.presupuesto || "Sin definir"}`,
-    a.tipo_envio === "parcial" ? `[ENVIO PARCIAL - el usuario abandono el quiz]` : "",
+    `A quien: ${a.a_quien || "(sin definir)"}`,
+    `Ocasion: ${a.ocasion || a.tipo_evento || "(sin definir)"}`,
+    a.emocion ? `Emocion previa: ${a.emocion}` : "",
+    `Intencion: ${a.intencion || "(sin definir)"}`,
+    a.codigo_elegido ? `Codigo elegido: ${a.codigo_elegido}` : "",
+    a.vision_descripcion ? `Vision: ${a.vision_descripcion}` : "",
+    a.vision_paleta ? `Paleta: ${a.vision_paleta}` : "",
+    a.personalizacion_multi?.length
+      ? `Personalizacion: ${a.personalizacion_multi.join(", ")}`
+      : "",
+    a.fecha_estimada ? `Fecha estimada: ${a.fecha_estimada}` : "",
+    a.fecha_exacta ? `Fecha exacta: ${a.fecha_exacta}` : "",
+    a.tipo_envio === "parcial"
+      ? `[ENVIO PARCIAL - el usuario abandono el quiz]`
+      : "",
   ].filter(Boolean);
   return lines.join(" | ");
 }
@@ -79,31 +86,32 @@ export async function POST(req: Request) {
     nombre: answers.contacto.nombre.trim(),
     telefono: answers.contacto.telefono.trim(),
     email: answers.contacto.email?.trim() || "",
-    tipo_evento:
-      answers.tipo_evento ||
-      (answers.codigo_dec ? `Con codigo DEC (${answers.codigo_dec})` : "Sin definir"),
-    para_quien: answers.para_quien,
-    tiene_tematica: answers.tiene_tematica || "",
-    tematica_detalle: answers.tematica_detalle || "",
-    fecha_evento: answers.fecha_evento || "",
-    presupuesto: answers.presupuesto || "",
+    a_quien: answers.a_quien || "",
+    ocasion: answers.ocasion || answers.tipo_evento || "",
+    emocion: answers.emocion || "",
+    intencion: answers.intencion || "",
+    codigo_elegido: answers.codigo_elegido || answers.codigo_dec || "",
+    vision_descripcion: answers.vision_descripcion || "",
+    vision_paleta: answers.vision_paleta || "",
+    personalizacion: answers.personalizacion_multi?.join(", ") || "",
+    fecha_estimada: answers.fecha_estimada || "",
+    fecha_exacta: answers.fecha_exacta || answers.fecha_evento || "",
     resumen_quiz: buildResumen(answers),
-    source: "landing_big_bang",
+    source: "landing_big_bang_funnel_v2",
   };
 
   console.info("[/api/lead] inbound", {
-    camino: answers.camino,
+    intencion: answers.intencion,
     tipo_envio: answers.tipo_envio || "completo",
     payload: {
       nombre: payload.nombre,
       telefono: maskPhone(payload.telefono),
       email: maskEmail(payload.email),
-      tipo_evento: payload.tipo_evento,
-      para_quien: payload.para_quien,
-      tiene_tematica: payload.tiene_tematica,
-      tematica_detalle: payload.tematica_detalle ? `${payload.tematica_detalle.slice(0, 60)}...` : "",
-      fecha_evento: payload.fecha_evento,
-      presupuesto: payload.presupuesto,
+      a_quien: payload.a_quien,
+      ocasion: payload.ocasion,
+      intencion: payload.intencion,
+      codigo_elegido: payload.codigo_elegido,
+      fecha_estimada: payload.fecha_estimada,
       resumen_quiz_len: payload.resumen_quiz.length,
     },
   });

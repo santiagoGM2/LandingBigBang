@@ -21,9 +21,9 @@ if (typeof window !== "undefined") {
 
 interface Scene {
   num: string;
+  className: string;
   img: { id: string; alt: string };
   text: React.ReactNode;
-  /** Atmosphere overlay específica de la escena */
   atmosphere?: string;
   cta?: { label: string; onClick: () => void };
 }
@@ -36,49 +36,56 @@ export function EspejoCuriosidad() {
   const scenes: Scene[] = [
     {
       num: "01",
+      className: "bb-escena-1",
       img: {
         id: "1530103862676-de8c9debad1d",
         alt: "Arco de globos colorido en montaje de fiesta",
       },
       text: (
         <h2 className="text-3xl md:text-5xl lg:text-6xl font-extrabold leading-[1.1]">
-          ¿Por qué recordamos algunas fiestas{" "}
-          <span className="text-bb-lime">toda la vida</span> y otras las olvidamos al día siguiente?
+          ¿Por qué hay personas que con una sola sorpresa se convierten en el{" "}
+          <span className="text-bb-lime">héroe de la familia</span>… y otras
+          gastan el doble y nadie recuerda nada?
         </h2>
       ),
     },
     {
       num: "02",
+      className: "bb-escena-2",
       img: {
         id: "1576337631739-92b58dca2c63",
         alt: "Mesa de dulces con donas y postres ornamentada",
       },
       text: (
         <p className="text-xl md:text-3xl leading-relaxed font-bold text-white/95">
-          El cerebro humano olvida las palabras pero guarda para siempre{" "}
-          <span className="text-bb-lime">el impacto visual</span> de un momento inesperado.
+          No es el precio lo que hace que alguien llore al abrir esa puerta. Es
+          saber exactamente{" "}
+          <span className="text-bb-lime">qué emoción querías</span> que sintiera.
         </p>
       ),
-      // Escena 2: bb-pink suave irradiando del centro
       atmosphere:
         "radial-gradient(60% 60% at 50% 50%, rgba(233,30,140,0.15) 0%, transparent 70%)",
     },
     {
       num: "03",
+      className: "bb-escena-3",
       img: {
         id: "1492684223066-81342ee5ff30",
-        alt: "Montaje completo de fiesta infantil con niños",
+        alt: "Montaje completo de fiesta con globos",
       },
       text: (
         <p className="text-xl md:text-3xl leading-relaxed font-extrabold">
-          No estás comprando decoraciones. Estás comprando acceso al nivel de{" "}
-          <span className="text-bb-lime">anfitrión inolvidable</span>.
+          No estás comprando globos. Estás comprando el momento en que esa
+          persona se da cuenta de{" "}
+          <span className="text-bb-lime">cuánto la amas</span>.
         </p>
       ),
-      // Escena 3: bb-lime irradiando de abajo
       atmosphere:
         "radial-gradient(70% 60% at 50% 100%, rgba(125,199,32,0.15) 0%, transparent 70%)",
-      cta: { label: "Quiero ese nivel", onClick: () => open() },
+      cta: {
+        label: "Quiero crear ese momento — Diseñar mi sorpresa gratis",
+        onClick: () => open(),
+      },
     },
   ];
 
@@ -160,16 +167,13 @@ function HorizontalEspejo({ scenes }: { scenes: Scene[] }) {
       if (typeof window === "undefined") return;
       if (window.innerWidth < 768) return;
 
-      const shift = (scenes.length - 1) * 100; // 200% para 3 escenas
-      const sceneCount = scenes.length;
+      const shift = (scenes.length - 1) * 100;
 
-      // Timeline principal — duration 3 (1 por escena) para que las posiciones
-      // absolutas tipo 0.95/1.10 caigan justo en los cruces.
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: sectionRef.current,
           start: "top top",
-          end: "+=180%",
+          end: "+=160%",
           scrub: 0.5,
           pin: true,
           anticipatePin: 1,
@@ -181,21 +185,50 @@ function HorizontalEspejo({ scenes }: { scenes: Scene[] }) {
         },
       });
 
-      // Movimiento horizontal del track
+      // Movimiento principal del track horizontal (duration 3 = 1 por escena)
       tl.to(
         trackRef.current,
-        { xPercent: -shift, duration: sceneCount, ease: "none" },
+        { xPercent: -shift, duration: 3, ease: "none" },
         0
       );
 
-      // Fade-out de toda la sección en los últimos 13% del timeline
-      tl.to(
-        sectionRef.current,
-        { opacity: 0, duration: 0.4, ease: "power2.in" },
-        ">-0.4"
+      // Animación por escena DENTRO del timeline principal: garantiza que
+      // las 3 escenas se animan, sin depender de ScrollTriggers anidados
+      // que se rompen cuando el contenedor está pinned.
+      // Escena 1 (0 - 1)
+      tl.from(
+        ".bb-escena-1 .bb-numero",
+        { scale: 0.5, rotate: -15, opacity: 0, duration: 0.4 },
+        0
+      ).from(
+        ".bb-escena-1 .bb-imagen",
+        { y: 30, opacity: 0, rotateY: -10, duration: 0.4 },
+        0.1
       );
 
-      // Flash transición rápida entre escenas 1→2 y 2→3
+      // Escena 2 (1 - 2)
+      tl.from(
+        ".bb-escena-2 .bb-numero",
+        { scale: 0.5, rotate: -15, opacity: 0, duration: 0.4 },
+        1
+      ).from(
+        ".bb-escena-2 .bb-imagen",
+        { y: 30, opacity: 0, rotateY: -10, duration: 0.4 },
+        1.1
+      );
+
+      // Escena 3 (2 - 3)
+      tl.from(
+        ".bb-escena-3 .bb-numero",
+        { scale: 0.5, rotate: -15, opacity: 0, duration: 0.4 },
+        2
+      ).from(
+        ".bb-escena-3 .bb-imagen",
+        { y: 30, opacity: 0, rotateY: -10, duration: 0.4 },
+        2.1
+      );
+
+      // Flash entre escenas 1→2 y 2→3
       if (transitionOverlayRef.current) {
         tl.to(
           transitionOverlayRef.current,
@@ -219,55 +252,17 @@ function HorizontalEspejo({ scenes }: { scenes: Scene[] }) {
           );
       }
 
-      // RotateY sutil en cada imagen durante el progreso de su escena
-      const images = sectionRef.current.querySelectorAll<HTMLElement>(
-        ".bb-espejo-scene-img"
+      // Fade-out de toda la sección al final del timeline → libera pin limpio
+      tl.to(
+        sectionRef.current,
+        { opacity: 0, duration: 0.3, ease: "power2.in" },
+        ">-0.3"
       );
-      images.forEach((img, i) => {
-        gsap.fromTo(
-          img,
-          { rotateY: -8, y: 20 },
-          {
-            rotateY: 8,
-            y: -20,
-            ease: "none",
-            scrollTrigger: {
-              trigger: sectionRef.current,
-              start: `top+=${(i / sceneCount) * 180}% top`,
-              end: `top+=${((i + 1) / sceneCount) * 180}% top`,
-              scrub: 1,
-            },
-          }
-        );
-      });
-
-      // Entrada de cada número decorativo: scale 0.5 → 1, rotateZ -15° → 0
-      const numbers = sectionRef.current.querySelectorAll<HTMLElement>(
-        ".bb-espejo-scene-num"
-      );
-      numbers.forEach((num, i) => {
-        gsap.fromTo(
-          num,
-          { scale: 0.5, rotateZ: -15, opacity: 0.3 },
-          {
-            scale: 1,
-            rotateZ: 0,
-            opacity: 1,
-            ease: "back.out(1.4)",
-            scrollTrigger: {
-              trigger: sectionRef.current,
-              start: `top+=${(i / sceneCount) * 180}% top`,
-              end: `top+=${(i / sceneCount + 0.3 / sceneCount) * 180}% top`,
-              scrub: 1,
-            },
-          }
-        );
-      });
     },
     { scope: sectionRef, dependencies: [] }
   );
 
-  // Mobile guard: si entra mobile renderiza StaticEspejo
+  // Mobile guard
   const [isMobile, setIsMobile] = React.useState(false);
   React.useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 768);
@@ -289,7 +284,6 @@ function HorizontalEspejo({ scenes }: { scenes: Scene[] }) {
     >
       <BackgroundLayers />
 
-      {/* Barra de progreso superior */}
       <div className="absolute left-0 right-0 top-0 z-30 h-[3px] bg-bb-pink/20">
         <div
           ref={progressRef}
@@ -298,7 +292,6 @@ function HorizontalEspejo({ scenes }: { scenes: Scene[] }) {
         />
       </div>
 
-      {/* Overlay de transición — flash purple entre escenas */}
       <div
         ref={transitionOverlayRef}
         aria-hidden
@@ -306,7 +299,6 @@ function HorizontalEspejo({ scenes }: { scenes: Scene[] }) {
         style={{ opacity: 0 }}
       />
 
-      {/* Track horizontal con las 3 escenas */}
       <div
         ref={trackRef}
         className="flex h-screen will-change-transform"
@@ -322,8 +314,12 @@ function HorizontalEspejo({ scenes }: { scenes: Scene[] }) {
 
 function SceneHorizontal({ scene }: { scene: Scene }) {
   return (
-    <div className="relative flex h-screen w-screen items-center px-6 md:px-16 lg:px-24">
-      {/* Atmosphere overlay específico de esta escena */}
+    <div
+      className={cn(
+        "relative flex h-screen w-screen items-center px-6 md:px-16 lg:px-24",
+        scene.className
+      )}
+    >
       {scene.atmosphere && (
         <div
           aria-hidden
@@ -332,17 +328,15 @@ function SceneHorizontal({ scene }: { scene: Scene }) {
         />
       )}
 
-      {/* Número gigante decorativo — animado por GSAP */}
       <span
         aria-hidden
-        className="bb-espejo-scene-num pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 select-none font-black leading-none text-bb-pink/15 lg:right-12 will-change-transform"
+        className="bb-numero pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 select-none font-black leading-none text-bb-pink/15 lg:right-12 will-change-transform"
         style={{ fontSize: "clamp(12rem, 32vw, 28rem)" }}
       >
         {scene.num}
       </span>
 
       <div className="relative z-10 mx-auto grid w-full max-w-7xl items-center gap-12 md:grid-cols-2">
-        {/* Columna texto — sin Quote icon (eliminado) */}
         <div className="relative">
           {scene.text}
           {scene.cta && (
@@ -354,10 +348,12 @@ function SceneHorizontal({ scene }: { scene: Scene }) {
           )}
         </div>
 
-        {/* Columna imagen con rotateY animado por GSAP */}
-        <div className="relative justify-self-center" style={{ perspective: "1200px" }}>
+        <div
+          className="relative justify-self-center"
+          style={{ perspective: "1200px" }}
+        >
           <div
-            className="bb-espejo-scene-img relative aspect-[4/5] w-full max-w-md overflow-hidden rounded-3xl bg-gradient-to-br from-bb-pink-soft/20 to-bb-purple-soft/40 will-change-transform"
+            className="bb-imagen relative aspect-[4/5] w-full max-w-md overflow-hidden rounded-3xl bg-gradient-to-br from-bb-pink-soft/20 to-bb-purple-soft/40 will-change-transform"
             style={{
               boxShadow: "0 30px 60px rgba(0,0,0,0.45)",
               transformStyle: "preserve-3d",

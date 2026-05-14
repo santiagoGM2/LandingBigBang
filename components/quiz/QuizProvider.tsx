@@ -5,14 +5,16 @@ import { QuizModal } from "./QuizModal";
 import type { QuizAnswers } from "@/lib/ghl";
 
 interface QuizCtx {
-  /** Abre el modal en welcome (o en Camino A si se pasa código DEC) */
+  /**
+   * Abre el modal del quiz. Si se pasa un código DEC, lo pre-selecciona en el
+   * paso 4 (rama "personalizar") como sugerencia inicial.
+   */
   open: (codigo?: string) => void;
   /**
-   * Abre el modal directo en Camino B paso 2 (¿Para quién?) con el `tipo_evento`
-   * pre-seleccionado desde el formulario inline de la landing.
+   * Abre el modal con respuestas pre-llenadas (ocasion, emocion, etc.) desde
+   * un punto de entrada inline (QuizInline section, ConexionEmocional).
    */
   openInline: (prefill: Partial<QuizAnswers>) => void;
-  scrollToMayorista: () => void;
 }
 
 const QuizContext = React.createContext<QuizCtx | null>(null);
@@ -40,14 +42,9 @@ export function QuizProvider({ children }: { children: React.ReactNode }) {
     setOpen(true);
   }, []);
 
-  const scrollToMayorista = React.useCallback(() => {
-    const el = document.getElementById("mayoristas");
-    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-  }, []);
-
   const value = React.useMemo<QuizCtx>(
-    () => ({ open: openQuiz, openInline, scrollToMayorista }),
-    [openQuiz, openInline, scrollToMayorista]
+    () => ({ open: openQuiz, openInline }),
+    [openQuiz, openInline]
   );
 
   return (
@@ -58,7 +55,6 @@ export function QuizProvider({ children }: { children: React.ReactNode }) {
         onOpenChange={setOpen}
         preselectedCodigo={codigo}
         inlineSeed={inlineSeed}
-        onRequestMayorista={scrollToMayorista}
       />
     </QuizContext.Provider>
   );

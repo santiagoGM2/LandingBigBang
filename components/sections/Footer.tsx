@@ -169,6 +169,15 @@ export function Footer() {
                   contacto@bigbangcali.com
                 </UnderlineLink>
               </li>
+              <li className="flex items-center gap-2.5 pt-2 mt-2 border-t border-white/10">
+                <UnderlineLink
+                  href={`https://wa.me/${WA}?text=${encodeURIComponent("Hola, escribo desde la web — me interesa información para empresas y eventos corporativos.")}`}
+                  external
+                  className="text-white/70"
+                >
+                  Para empresas y eventos corporativos
+                </UnderlineLink>
+              </li>
             </ul>
           </motion.div>
         </motion.div>
