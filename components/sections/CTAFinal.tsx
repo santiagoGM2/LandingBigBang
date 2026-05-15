@@ -12,7 +12,6 @@ import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
-import { BorderBeam } from "@/components/ui/border-beam";
 import { useQuiz } from "@/components/quiz/QuizProvider";
 import { useHasMounted } from "@/lib/use-has-mounted";
 import { useIsDesktop } from "@/lib/use-media-query";
@@ -250,7 +249,6 @@ export function CTAFinal() {
             >
               Crear esa sorpresa ahora →
             </motion.button>
-            <BorderBeam duration={3.5} colorFrom="#FFFFFF" colorTo="#7DC720" />
           </div>
           <p className="mt-4 text-sm md:text-base text-white/80">
             Gratis · Sin compromiso · Te respondemos en menos de 15 minutos
