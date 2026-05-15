@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Image from "next/image";
 import {
   motion,
   useMotionValue,
@@ -162,30 +163,53 @@ export function CTAFinal() {
       ref={sectionRef}
       className="relative overflow-hidden bg-bb-purple py-24 md:py-32 text-white"
     >
-      {/* Video background loop. Blur sutil + parallax via GSAP. */}
-      <video
-        key={videoSrc}
-        ref={videoRef}
-        aria-hidden
-        autoPlay
-        muted
-        loop
-        playsInline
-        preload="metadata"
-        poster={VIDEO_POSTER}
-        onError={() => {
-          if (videoIdx < VIDEO_SOURCES.length - 1) setVideoIdx((i) => i + 1);
-        }}
-        // Phase Q.1: blur + brightness reducido para que el video sea ambiente
-        // puro. El scale evita que el blur deje halo gris en los bordes.
-        style={{
-          filter: "blur(1px) brightness(0.7)",
-          transform: "scale(1.06)",
-        }}
-        className="pointer-events-none absolute inset-0 z-0 h-[115%] w-full object-cover -top-[7.5%]"
-      >
-        <source src={videoSrc} type="video/mp4" />
-      </video>
+      {/* Background ambiente. Desktop: video loop con parallax. Mobile/SSR:
+          imagen estatica de globos — los videos pesan demasiado en celular y
+          el autoplay de mp4 no es confiable en iOS bajo data saver. */}
+      {mounted && desktop ? (
+        <video
+          key={videoSrc}
+          ref={videoRef}
+          aria-hidden
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="metadata"
+          poster={VIDEO_POSTER}
+          onError={() => {
+            if (videoIdx < VIDEO_SOURCES.length - 1) setVideoIdx((i) => i + 1);
+          }}
+          // Phase Q.1: blur + brightness reducido para que el video sea ambiente
+          // puro. El scale evita que el blur deje halo gris en los bordes.
+          style={{
+            filter: "blur(1px) brightness(0.7)",
+            transform: "scale(1.06)",
+          }}
+          className="pointer-events-none absolute inset-0 z-0 h-[115%] w-full object-cover -top-[7.5%]"
+        >
+          <source src={videoSrc} type="video/mp4" />
+        </video>
+      ) : (
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 z-0 h-[115%] w-full -top-[7.5%]"
+          style={{
+            filter: "blur(1px) brightness(0.7)",
+            transform: "scale(1.06)",
+          }}
+        >
+          <Image
+            src={VIDEO_POSTER}
+            alt=""
+            fill
+            sizes="100vw"
+            priority
+            className="object-cover"
+            unoptimized
+          />
+        </div>
+      )}
 
       {/* Overlay morado muy opaco — texto siempre dominante */}
       <div
