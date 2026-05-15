@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 type Variant = "default" | "footer" | "compact";
@@ -11,57 +10,81 @@ interface Props {
   className?: string;
   /** Texto accesible (default: "Big Bang Cali") */
   label?: string;
-  /** Carga prioritaria (LoadingScreen, Hero) */
+  /** Carga prioritaria (no aplica al SVG inline, se mantiene por compat) */
   priority?: boolean;
 }
 
-// Logo local en /public es la fuente primaria. El CDN del cliente queda como
-// red de seguridad si el archivo local se borra accidentalmente del bundle.
-const LOGO_LOCAL = "/logo-big-bang.png";
-const LOGO_CDN =
-  "https://assets.cdn.filesafe.space/cmpzRjKz3Lb2QJBXQTJw/media/6a0631e2e92818f121b6044a.png";
-const INTRINSIC_W = 382;
-const INTRINSIC_H = 217;
-
 /**
- * Logo Big Bang oficial.
- *  - default: usa el PNG con sus colores (rosa + outline lime + sombra purple)
- *  - footer:  el mismo PNG pero invertido a blanco vía CSS filter
- *  - compact: igual al default pero más chico para navs y FABs
+ * Logo Big Bang oficial renderizado inline como SVG. Garantiza fondo
+ * transparente y permite cambiar colores sin trucos de filter:invert (que
+ * pintaba un cuadrado blanco cuando el PNG no tenía alpha limpio).
  *
- * Estrategia de carga: intenta el archivo local de /public primero; si por
- * algún motivo falla, cae al CDN del cliente.
+ *  - default / compact: rosa relleno + outline lime + drop-shadow purple
+ *  - footer:            mismo trazo en blanco puro, drop-shadow translúcido
  */
 export function BigBangLogo({
   variant = "default",
   className,
   label = "Big Bang Cali",
-  priority = false,
 }: Props) {
-  const [src, setSrc] = React.useState<string>(LOGO_LOCAL);
-
   const sizeClass =
-    variant === "compact"
-      ? "h-8 w-auto"
-      : variant === "footer"
-        ? "h-20 w-auto"
-        : "h-20 w-auto";
+    variant === "compact" ? "h-8 w-auto" : "h-20 w-auto";
 
-  const invertFilter =
-    variant === "footer" ? { filter: "brightness(0) invert(1)" } : undefined;
+  const isFooter = variant === "footer";
+  const fill = isFooter ? "#ffffff" : "#E91E8C";
+  const stroke = isFooter ? "#ffffff" : "#7DC720";
+  const shadowMatrix = isFooter
+    ? "0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.35 0"
+    : "0 0 0 0 0.239  0 0 0 0 0.102  0 0 0 0 0.431  0 0 0 1 0";
 
   return (
-    <Image
-      src={src}
-      alt={label}
-      width={INTRINSIC_W}
-      height={INTRINSIC_H}
-      priority={priority}
-      style={invertFilter}
+    <svg
+      viewBox="0 0 280 200"
+      role="img"
+      aria-label={label}
+      xmlns="http://www.w3.org/2000/svg"
       className={cn("select-none", sizeClass, className)}
-      onError={() => {
-        if (src !== LOGO_CDN) setSrc(LOGO_CDN);
-      }}
-    />
+    >
+      <defs>
+        <filter id="bb-shadow" x="-10%" y="-10%" width="120%" height="125%">
+          <feOffset dx="0" dy="4" />
+          <feColorMatrix type="matrix" values={shadowMatrix} />
+          <feMerge>
+            <feMergeNode />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+      </defs>
+      <g
+        filter="url(#bb-shadow)"
+        fontFamily="Nunito, system-ui, sans-serif"
+        fontWeight={900}
+        textAnchor="middle"
+        paintOrder="stroke"
+      >
+        <text
+          x={140}
+          y={88}
+          fontSize={84}
+          stroke={stroke}
+          strokeWidth={6}
+          strokeLinejoin="round"
+          fill={fill}
+        >
+          BIG
+        </text>
+        <text
+          x={140}
+          y={170}
+          fontSize={84}
+          stroke={stroke}
+          strokeWidth={6}
+          strokeLinejoin="round"
+          fill={fill}
+        >
+          BANG
+        </text>
+      </g>
+    </svg>
   );
 }
