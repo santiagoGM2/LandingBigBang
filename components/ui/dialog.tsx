@@ -16,6 +16,7 @@ const DialogOverlay = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DialogPrimitive.Overlay
     ref={ref}
+    data-lenis-prevent
     className={cn(
       "fixed inset-0 z-50 bg-bb-purple/70 backdrop-blur-sm",
       "data-[state=open]:animate-[bb-fade-in_180ms_ease-out]",
@@ -37,6 +38,7 @@ const DialogContent = React.forwardRef<
     <DialogOverlay />
     <DialogPrimitive.Content
       ref={ref}
+      data-lenis-prevent
       className={cn(
         "fixed left-1/2 top-1/2 z-50 -translate-x-1/2 -translate-y-1/2",
         "w-[calc(100vw-1rem)] max-w-2xl max-h-[92dvh] overflow-y-auto overscroll-contain bg-white",

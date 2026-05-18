@@ -10,19 +10,13 @@ if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
 }
 
-declare global {
-  interface Window {
-    __lenis?: Lenis;
-  }
-}
-
 /**
  * Smooth scroll global con Lenis + integración con GSAP ScrollTrigger.
  * Desactivado en mobile (<768px) y bajo prefers-reduced-motion.
  *
- * Expone la instancia en `window.__lenis` para que componentes externos
- * (ej. QuizModal) puedan pausar el smooth scroll mientras un modal está
- * abierto, evitando que Lenis robe los eventos wheel del modal.
+ * Los elementos que deben recibir wheel/touch nativos (modales, dropdowns
+ * scrolleables) deben llevar el atributo `data-lenis-prevent`. Lenis los
+ * excluye del intercept de eventos.
  */
 export function SmoothScroll() {
   const reduced = useReducedMotion();
@@ -39,8 +33,6 @@ export function SmoothScroll() {
       touchMultiplier: 1.5,
     });
 
-    window.__lenis = lenis;
-
     const onScroll = () => ScrollTrigger.update();
     lenis.on("scroll", onScroll);
 
@@ -54,9 +46,6 @@ export function SmoothScroll() {
       lenis.off("scroll", onScroll);
       gsap.ticker.remove(tickerCallback);
       lenis.destroy();
-      if (window.__lenis === lenis) {
-        delete window.__lenis;
-      }
     };
   }, [reduced]);
 
