@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import Image from "next/image";
 import {
   motion,
   useMotionValue,
@@ -26,18 +25,6 @@ const MAGNETIC_RADIUS = 80;
 const MAGNETIC_MAX = 8;
 const TILT_MAX = 4;
 
-// Phase Q.1: videos sin foco luminoso central. Cadena de fallback — si el
-// primero no carga (CDN caído, CORS) cae al siguiente. El video #8068291
-// que se usó en Phase Q quedó descartado: tenía un globo claro destacado
-// en primer plano que distraía del texto.
-const VIDEO_SOURCES = [
-  "https://videos.pexels.com/video-files/4045222/4045222-hd_1920_1080_25fps.mp4",
-  "https://videos.pexels.com/video-files/3209828/3209828-hd_1920_1080_25fps.mp4",
-  "https://videos.pexels.com/video-files/8064146/8064146-uhd_2560_1440_30fps.mp4",
-];
-const VIDEO_POSTER =
-  "https://images.unsplash.com/photo-1530103862676-de8c9debad1d?auto=format&fit=crop&w=1600&h=900&q=70";
-
 const NOISE_URL =
   "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.05 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>\")";
 
@@ -47,21 +34,16 @@ export function CTAFinal() {
   const mounted = useHasMounted();
   const desktop = useIsDesktop();
   const sectionRef = React.useRef<HTMLElement>(null);
-  const videoRef = React.useRef<HTMLVideoElement>(null);
   const contentRef = React.useRef<HTMLDivElement>(null);
   const btnRef = React.useRef<HTMLButtonElement>(null);
   const animate = mounted && !reduced;
   const enable3D = animate && desktop;
-  const [videoIdx, setVideoIdx] = React.useState(0);
-  const videoSrc = VIDEO_SOURCES[videoIdx];
 
-  // Magnetic translate
   const mx = useMotionValue(0);
   const my = useMotionValue(0);
   const sx = useSpring(mx, { stiffness: 240, damping: 14 });
   const sy = useSpring(my, { stiffness: 240, damping: 14 });
 
-  // Tilt 3D del botón con cursor
   const tiltXRaw = useMotionValue(0);
   const tiltYRaw = useMotionValue(0);
   const tiltX = useSpring(tiltXRaw, { stiffness: 200, damping: 18 });
@@ -69,31 +51,11 @@ export function CTAFinal() {
   const rotateX = useTransform(tiltX, [-1, 1], [TILT_MAX, -TILT_MAX]);
   const rotateY = useTransform(tiltY, [-1, 1], [-TILT_MAX, TILT_MAX]);
 
-  // Scroll-driven entrada 3D + parallax del video
+  // Entrada 3D scroll-driven del contenido
   useGSAP(
     () => {
       if (!animate || !sectionRef.current) return;
 
-      // Parallax sutil en el video (15% en eje Y)
-      if (videoRef.current) {
-        gsap.fromTo(
-          videoRef.current,
-          { yPercent: -7 },
-          {
-            yPercent: 7,
-            ease: "none",
-            scrollTrigger: {
-              trigger: sectionRef.current,
-              start: "top bottom",
-              end: "bottom top",
-              scrub: 1,
-            },
-          }
-        );
-      }
-
-      // Entrada 3D scroll-driven del contenido. rotateX 15° → 0, translateZ
-      // -100 → 0, opacity 0 → 1, con stagger entre h2/p/cta.
       const ctx = gsap.context(() => {
         gsap.from(".bb-cta-anim", {
           opacity: 0,
@@ -161,71 +123,18 @@ export function CTAFinal() {
   return (
     <section
       ref={sectionRef}
-      className="relative overflow-hidden bg-bb-purple py-24 md:py-32 text-white"
+      className="relative w-full overflow-hidden py-20 sm:py-24 md:py-32 text-white bg-gradient-to-b from-bb-purple via-bb-purple to-bb-purple/95"
     >
-      {/* Background ambiente. Desktop: video loop con parallax. Mobile/SSR:
-          imagen estatica de globos — los videos pesan demasiado en celular y
-          el autoplay de mp4 no es confiable en iOS bajo data saver. */}
-      {mounted && desktop ? (
-        <video
-          key={videoSrc}
-          ref={videoRef}
-          aria-hidden
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="metadata"
-          poster={VIDEO_POSTER}
-          onError={() => {
-            if (videoIdx < VIDEO_SOURCES.length - 1) setVideoIdx((i) => i + 1);
-          }}
-          // Phase Q.1: blur + brightness reducido para que el video sea ambiente
-          // puro. El scale evita que el blur deje halo gris en los bordes.
-          style={{
-            filter: "blur(1px) brightness(0.7)",
-            transform: "scale(1.06)",
-          }}
-          className="pointer-events-none absolute inset-0 z-0 h-[115%] w-full object-cover -top-[7.5%]"
-        >
-          <source src={videoSrc} type="video/mp4" />
-        </video>
-      ) : (
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 z-0 h-[115%] w-full -top-[7.5%]"
-          style={{
-            filter: "blur(1px) brightness(0.7)",
-            transform: "scale(1.06)",
-          }}
-        >
-          <Image
-            src={VIDEO_POSTER}
-            alt=""
-            fill
-            sizes="100vw"
-            priority
-            className="object-cover"
-            unoptimized
-          />
-        </div>
-      )}
-
-      {/* Overlay morado muy opaco — texto siempre dominante */}
+      {/* Noise overlay sutil para textura */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 z-0 bg-gradient-to-b from-bb-purple/95 via-bb-purple/92 to-bb-purple/97"
-      />
-      {/* Noise sutil */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 z-0 opacity-40 mix-blend-overlay"
+        className="pointer-events-none absolute inset-0 z-0 opacity-30 mix-blend-overlay"
         style={{ backgroundImage: NOISE_URL, backgroundSize: "160px 160px" }}
       />
 
       <div
         ref={contentRef}
-        className="relative z-10 mx-auto max-w-4xl px-6 text-center"
+        className="relative z-10 mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center"
         style={{ perspective: enable3D ? "1200px" : undefined }}
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}

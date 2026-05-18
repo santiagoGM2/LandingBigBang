@@ -314,6 +314,22 @@ export function QuizModal({
   const isLastStep = step === flow.length - 1;
   const canAdvance = currentStep ? currentStep.isValid(answers) : false;
 
+  /* ─── Lenis lock ───────────────────────────────────────── */
+  /* Cuando el modal está abierto, pausamos Lenis para que el wheel/touchpad
+   * scrollee el DialogContent (overflow-y-auto) en vez de la página de fondo.
+   * Sin esto, Lenis intercepta el wheel a nivel de documento y el modal nunca
+   * recibe el evento. Mobile (<768px) no tiene Lenis instanciado, así que el
+   * efecto es no-op ahí. */
+  React.useEffect(() => {
+    const lenis = typeof window !== "undefined" ? window.__lenis : undefined;
+    if (!lenis) return;
+    if (open) lenis.stop();
+    else lenis.start();
+    return () => {
+      lenis.start();
+    };
+  }, [open]);
+
   /* ─── Init + seed + persistencia ───────────────────────── */
   React.useEffect(() => {
     if (!open) return;

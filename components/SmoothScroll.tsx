@@ -10,14 +10,19 @@ if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
 }
 
+declare global {
+  interface Window {
+    __lenis?: Lenis;
+  }
+}
+
 /**
  * Smooth scroll global con Lenis + integración con GSAP ScrollTrigger.
  * Desactivado en mobile (<768px) y bajo prefers-reduced-motion.
  *
- * La integración con GSAP garantiza que ScrollTrigger.update() se llame
- * en cada paso de Lenis (clave para que el pin/scrub de Espejo no se
- * desincronice). El ticker de GSAP también maneja el raf loop, así no
- * mantenemos un raf manual paralelo.
+ * Expone la instancia en `window.__lenis` para que componentes externos
+ * (ej. QuizModal) puedan pausar el smooth scroll mientras un modal está
+ * abierto, evitando que Lenis robe los eventos wheel del modal.
  */
 export function SmoothScroll() {
   const reduced = useReducedMotion();
@@ -34,6 +39,8 @@ export function SmoothScroll() {
       touchMultiplier: 1.5,
     });
 
+    window.__lenis = lenis;
+
     const onScroll = () => ScrollTrigger.update();
     lenis.on("scroll", onScroll);
 
@@ -47,6 +54,9 @@ export function SmoothScroll() {
       lenis.off("scroll", onScroll);
       gsap.ticker.remove(tickerCallback);
       lenis.destroy();
+      if (window.__lenis === lenis) {
+        delete window.__lenis;
+      }
     };
   }, [reduced]);
 
