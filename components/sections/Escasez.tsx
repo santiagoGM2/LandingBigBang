@@ -45,12 +45,15 @@ function useCountdown(): Countdown | null {
       deadline = Date.now() + WINDOW_MS;
     }
 
-    let intervalId: ReturnType<typeof setInterval> | undefined;
+    // ref-shaped wrapper para que `tick` pueda referenciar el id antes de que
+    // setInterval lo asigne (mantiene la closure simple sin un `let` que eslint
+    // marca como "never reassigned").
+    const handle: { id: ReturnType<typeof setInterval> | null } = { id: null };
     const tick = () => {
       const ms = deadline - Date.now();
       if (ms <= 0) {
         setDiff({ h: 0, m: 0, s: 0 });
-        if (intervalId) clearInterval(intervalId);
+        if (handle.id) clearInterval(handle.id);
         return;
       }
       const h = Math.floor(ms / 3_600_000);
@@ -60,9 +63,9 @@ function useCountdown(): Countdown | null {
     };
 
     tick();
-    intervalId = setInterval(tick, 1000);
+    handle.id = setInterval(tick, 1000);
     return () => {
-      if (intervalId) clearInterval(intervalId);
+      if (handle.id) clearInterval(handle.id);
     };
   }, []);
 

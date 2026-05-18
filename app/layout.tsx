@@ -48,6 +48,60 @@ export const metadata: Metadata = {
   alternates: { canonical: siteUrl },
   authors: [{ name: "Big Bang Cali" }],
   creator: "Big Bang Cali",
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+};
+
+// Schema.org LocalBusiness — SEO local para Cali. Algunos datos son placeholder
+// hasta que el cliente confirme valores definitivos (teléfono real, horarios
+// exactos, lat/lon exactos del local).
+const businessJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "LocalBusiness",
+  name: "Big Bang Piñatas y Regalos",
+  image: `${siteUrl}/logo-big-bang.png`,
+  url: siteUrl,
+  // TODO: confirmar número definitivo con el cliente.
+  telephone: "+57-301-318-2266",
+  address: {
+    "@type": "PostalAddress",
+    streetAddress: "Calle 9 # 30-44",
+    addressLocality: "Cali",
+    addressRegion: "Valle del Cauca",
+    addressCountry: "CO",
+  },
+  geo: {
+    "@type": "GeoCoordinates",
+    latitude: 3.4294697,
+    longitude: -76.5391016,
+  },
+  openingHoursSpecification: [
+    {
+      "@type": "OpeningHoursSpecification",
+      dayOfWeek: [
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+      ],
+      opens: "09:00",
+      closes: "19:00",
+    },
+  ],
+  priceRange: "$$",
+  description:
+    "Decoración premium con globos en Cali. Diseñamos sorpresas personalizadas que se convierten en recuerdos para toda la familia.",
+  areaServed: { "@type": "City", name: "Cali" },
 };
 
 export const viewport: Viewport = {
@@ -65,6 +119,13 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         </a>
         <SmoothScroll />
         {children}
+
+        <Script
+          id="bb-jsonld-localbusiness"
+          type="application/ld+json"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(businessJsonLd) }}
+        />
 
         {GA_ID && (
           <>

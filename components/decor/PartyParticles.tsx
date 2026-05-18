@@ -38,17 +38,27 @@ export function PartyParticles({
   const reduced = useReducedMotion();
   const mounted = useHasMounted();
 
+  // Pseudo-random determinístico basado en el índice: produce el mismo
+  // resultado en cada render (sin Math.random impuro). Suficiente para una
+  // capa decorativa que solo necesita "verse random".
   const particles = React.useMemo<Particle[]>(() => {
-    return Array.from({ length: count }, (_, i) => ({
-      id: i,
-      glyph: GLYPHS[i % GLYPHS.length],
-      x: Math.random() * 100,
-      y: Math.random() * 100,
-      size: 10 + Math.random() * 16,
-      duration: 7 + Math.random() * 6,
-      delay: Math.random() * 4,
-      drift: 20 + Math.random() * 20,
-    }));
+    return Array.from({ length: count }, (_, i) => {
+      const a = Math.sin((i + 1) * 12.9898) * 43758.5453;
+      const b = Math.sin((i + 1) * 78.233) * 43758.5453;
+      const c = Math.sin((i + 1) * 39.346) * 43758.5453;
+      const d = Math.sin((i + 1) * 91.5147) * 43758.5453;
+      const r = (n: number) => n - Math.floor(n);
+      return {
+        id: i,
+        glyph: GLYPHS[i % GLYPHS.length],
+        x: r(a) * 100,
+        y: r(b) * 100,
+        size: 10 + r(c) * 16,
+        duration: 7 + r(d) * 6,
+        delay: r(a + b) * 4,
+        drift: 20 + r(c + d) * 20,
+      };
+    });
   }, [count]);
 
   if (!mounted || reduced) return null;
