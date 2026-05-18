@@ -59,7 +59,7 @@ const STATS: Stat[] = [
     prefix: "+",
     title: "temáticas disponibles",
     caption: "Y si la que buscas no existe, la creamos desde cero contigo.",
-    micro: "desde princesas hasta referencias de Netflix — todo personalizable",
+    micro: "desde princesas hasta referencias de Netflix, todo personalizable",
   },
   {
     icon: Store,
@@ -135,9 +135,9 @@ export function StatsPotenciadas() {
       <div className="mx-auto max-w-7xl px-6">
         <div className="mx-auto max-w-3xl text-center">
           <h2 className="text-3xl md:text-4xl font-extrabold text-bb-purple leading-tight">
-            Números que no mienten —{" "}
+            Números que no mienten.{" "}
             <span className="text-bb-pink">
-              detrás de cada globo hay una historia real
+              Detrás de cada globo hay una historia real.
             </span>
           </h2>
           <p className="mt-3 text-bb-text/75">

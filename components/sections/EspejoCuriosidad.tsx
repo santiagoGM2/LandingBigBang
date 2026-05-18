@@ -145,7 +145,7 @@ export function EspejoCuriosidad() {
           </SceneBody>
 
           <SceneFootline tone="dark">
-            03 · Diseñamos ese momento — gratis, en 60 segundos.
+            03 · Diseñamos ese momento. Gratis, en 60 segundos.
           </SceneFootline>
         </FlowSection>
       </FlowArt>

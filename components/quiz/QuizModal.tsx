@@ -82,7 +82,7 @@ interface IntencionOption {
 const INTENCIONES: IntencionOption[] = [
   { value: "personalizar", label: "Quiero personalizar una de estas", icon: Pencil },
   { value: "cero", label: "Tengo una idea desde cero", icon: Lightbulb },
-  { value: "sorprendeme", label: "Sorpréndanme — confío en ustedes", icon: Sparkles },
+  { value: "sorprendeme", label: "Sorpréndanme, confío en ustedes", icon: Sparkles },
   { value: "asesoria", label: "Prefiero que me asesoren", icon: MessageCircle },
 ];
 
@@ -234,7 +234,7 @@ const ALL_STEPS: StepDef[] = [
   },
   {
     key: "contacto",
-    title: "Último paso — ¿cómo te contactamos?",
+    title: "Último paso. ¿Cómo te contactamos?",
     isValid: (a) =>
       (a.contacto?.nombre?.trim().length ?? 0) >= 2 &&
       /^\+?\d[\d\s-]{7,}$/.test(a.contacto?.telefono ?? ""),
@@ -561,7 +561,6 @@ export function QuizModal({
           <PausaVisual
             a={answers.a_quien}
             o={answers.ocasion}
-            onContinuar={goNext}
           />
         );
       case "intencion":
@@ -679,7 +678,7 @@ export function QuizModal({
                 </AnimatePresence>
               </div>
 
-              <div className="mt-8 flex items-center justify-between gap-3">
+              <div className="sticky bottom-0 -mx-5 md:-mx-10 mt-6 flex items-center justify-between gap-3 border-t border-bb-purple/10 bg-white/95 px-5 py-3 backdrop-blur-sm md:static md:mx-0 md:mt-8 md:border-0 md:bg-transparent md:px-0 md:py-0 md:backdrop-blur-none">
                 <Button
                   type="button"
                   variant="ghost"
@@ -697,7 +696,6 @@ export function QuizModal({
                     size="lg"
                     onClick={handleSubmit}
                     disabled={!canAdvance || submitting}
-                    className="max-w-full whitespace-normal text-left leading-snug"
                   >
                     {submitting ? (
                       <>
@@ -705,11 +703,16 @@ export function QuizModal({
                         Asegurando tu reserva...
                       </>
                     ) : (
-                      <>
-                        Quiero que me contacten — la sorpresa está a punto de
-                        empezar
-                      </>
+                      "Quiero que me contacten"
                     )}
+                  </Button>
+                ) : currentStep.key === "pausa_visual" ? (
+                  <Button
+                    type="button"
+                    size="lg"
+                    onClick={goNext}
+                  >
+                    Continuar al paso 3 <ArrowRight className="h-5 w-5" />
                   </Button>
                 ) : (
                   <Button
@@ -808,11 +811,9 @@ function IconGrid({
 function PausaVisual({
   a,
   o,
-  onContinuar,
 }: {
   a?: string;
   o?: string;
-  onContinuar: () => void;
 }) {
   const gallery = React.useMemo(() => pickGallery(a, o, 6), [a, o]);
   const refAQuien = a
@@ -822,18 +823,20 @@ function PausaVisual({
     : "esa persona";
 
   return (
-    <div className="space-y-5">
-      <p className="rounded-2xl bg-bb-pink-soft/60 px-4 py-3 text-sm text-bb-purple/85 leading-snug">
+    <div className="space-y-4">
+      <p className="rounded-2xl bg-bb-pink-soft/60 px-4 py-2.5 text-sm text-bb-purple/85 leading-snug">
         Mientras procesamos, mirá lo que hemos creado para personas como{" "}
-        <strong>{refAQuien}</strong>. Click en <strong>Continuar</strong> cuando
-        estés listo.
+        <strong>{refAQuien}</strong>.
       </p>
 
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
-        {gallery.map((c) => (
+      <div className="grid grid-cols-2 gap-2 md:grid-cols-3 md:gap-3">
+        {gallery.map((c, i) => (
           <div
             key={c.codigo}
-            className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-gradient-to-br from-bb-pink-soft to-bb-purple-soft/30 shadow-bb-soft"
+            className={cn(
+              "relative aspect-[4/5] overflow-hidden rounded-2xl bg-gradient-to-br from-bb-pink-soft to-bb-purple-soft/30 shadow-bb-soft",
+              i >= 4 && "hidden md:block"
+            )}
           >
             <Image
               src={c.img}
@@ -849,20 +852,6 @@ function PausaVisual({
           </div>
         ))}
       </div>
-
-      <button
-        type="button"
-        onClick={onContinuar}
-        className={cn(
-          "group w-full rounded-2xl bg-bb-purple px-6 py-4 text-base font-bold text-white",
-          "shadow-bb-soft transition-all hover:bg-bb-pink hover:-translate-y-0.5",
-          "focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-bb-pink/30",
-          "inline-flex items-center justify-center gap-2"
-        )}
-      >
-        Continuar al paso 3
-        <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-      </button>
     </div>
   );
 }

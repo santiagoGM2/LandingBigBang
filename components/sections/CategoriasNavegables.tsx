@@ -117,7 +117,7 @@ export function CategoriasNavegables() {
     (cat: Categoria, label: string) => {
       setSelected(cat);
       toast.success(
-        `Perfecto — te mostramos nuestros diseños para ${label}`
+        `Perfecto. Te mostramos nuestros diseños para ${label}`
       );
     },
     []

@@ -171,7 +171,7 @@ export function Footer() {
               </li>
               <li className="flex items-center gap-2.5 pt-2 mt-2 border-t border-white/10">
                 <UnderlineLink
-                  href={`https://wa.me/${WA}?text=${encodeURIComponent("Hola, escribo desde la web — me interesa información para empresas y eventos corporativos.")}`}
+                  href={`https://wa.me/${WA}?text=${encodeURIComponent("Hola, escribo desde la web. Me interesa información para empresas y eventos corporativos.")}`}
                   external
                   className="text-white/70"
                 >

@@ -98,7 +98,7 @@ export function Escasez({ cuposOcupados = 2, cuposTotal = 3 }: Props) {
         className="pointer-events-none absolute -bottom-24 -left-16 h-72 w-72 rounded-full bg-bb-lime/15 blur-3xl"
       />
 
-      <div className="relative z-10 mx-auto max-w-5xl px-6">
+      <div className="relative z-10 mx-auto max-w-5xl px-4 sm:px-6">
         <motion.div
           initial={animate ? { opacity: 0, y: 24 } : false}
           whileInView={animate ? { opacity: 1, y: 0 } : undefined}
@@ -106,44 +106,42 @@ export function Escasez({ cuposOcupados = 2, cuposTotal = 3 }: Props) {
           transition={{ duration: 0.7 }}
           className="grid items-center gap-10 md:grid-cols-[1.4fr_1fr]"
         >
-          <div>
+          <div className="text-center md:text-left">
             <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-bold uppercase tracking-wide text-bb-lime">
               <CalendarClock className="h-4 w-4" /> Cupos esta semana
             </span>
-            <h2 className="mt-4 text-3xl md:text-5xl font-extrabold leading-[1.05]">
+            <h2 className="mt-4 text-2xl sm:text-3xl md:text-5xl font-extrabold leading-[1.1] text-balance">
               Solo aceptamos {cuposTotal} montajes de alta gama por semana
             </h2>
-            <p className="mt-5 max-w-lg text-white/85 leading-relaxed">
+            <p className="mt-5 mx-auto md:mx-0 max-w-lg text-white/85 leading-relaxed text-balance">
               Para asegurar que cada detalle sea perfecto, cerramos cupos cada
               lunes. Si tu fecha es este o el próximo fin de semana, esto es
               urgente.
             </p>
             {cd && (
-              <p className="mt-6 inline-flex items-center gap-1.5 text-sm font-bold text-bb-lime">
-                Cierra en
-                <span className="rounded-md bg-white/10 px-2 py-1 text-white tabular-nums">
-                  {String(cd.h).padStart(2, "0")}h
-                </span>
-                <span className="rounded-md bg-white/10 px-2 py-1 text-white tabular-nums">
-                  {String(cd.m).padStart(2, "0")}m
-                </span>
-                <span className="rounded-md bg-white/10 px-2 py-1 text-white tabular-nums">
-                  {String(cd.s).padStart(2, "0")}s
-                </span>
-              </p>
+              <div className="mt-7">
+                <p className="text-xs font-bold uppercase tracking-wider text-bb-lime mb-3">
+                  Cierra en
+                </p>
+                <div className="grid grid-cols-3 gap-2 sm:gap-3 max-w-sm mx-auto md:mx-0">
+                  <CountdownCell label="horas" value={cd.h} />
+                  <CountdownCell label="minutos" value={cd.m} />
+                  <CountdownCell label="segundos" value={cd.s} pulse />
+                </div>
+              </div>
             )}
           </div>
 
-          <div className="rounded-3xl bg-white/8 ring-1 ring-white/15 p-7 backdrop-blur-sm">
+          <div className="rounded-3xl bg-white/8 ring-1 ring-white/15 p-5 sm:p-7 backdrop-blur-sm">
             <p className="text-sm font-bold uppercase tracking-wide text-bb-lime">
               Disponibilidad
             </p>
-            <div className="mt-4 flex items-center gap-3">
+            <div className="mt-4 flex flex-wrap items-center gap-3">
               {cupos.map((ocupado, i) => (
                 <div
                   key={i}
                   className={cn(
-                    "relative grid h-16 w-16 place-items-center overflow-hidden rounded-full border-4 transition-all",
+                    "relative grid h-14 w-14 sm:h-16 sm:w-16 place-items-center overflow-hidden rounded-full border-4 transition-all",
                     ocupado ? "border-bb-pink" : "border-bb-lime"
                   )}
                   aria-label={ocupado ? "Cupo ocupado" : "Cupo disponible"}
@@ -197,5 +195,39 @@ export function Escasez({ cuposOcupados = 2, cuposTotal = 3 }: Props) {
         </motion.div>
       </div>
     </section>
+  );
+}
+
+function CountdownCell({
+  label,
+  value,
+  pulse = false,
+}: {
+  label: string;
+  value: number;
+  pulse?: boolean;
+}) {
+  const padded = String(value).padStart(2, "0");
+  return (
+    <div className="flex flex-col items-center rounded-2xl bg-white/10 ring-1 ring-white/15 py-3 sm:py-4 px-2">
+      {pulse ? (
+        <motion.span
+          key={padded}
+          initial={{ scale: 1.18, opacity: 0.7 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+          className="text-3xl sm:text-5xl font-black text-white tabular-nums leading-none"
+        >
+          {padded}
+        </motion.span>
+      ) : (
+        <span className="text-3xl sm:text-5xl font-black text-white tabular-nums leading-none">
+          {padded}
+        </span>
+      )}
+      <span className="mt-1.5 text-[10px] sm:text-xs uppercase tracking-wider text-white/70">
+        {label}
+      </span>
+    </div>
   );
 }

@@ -187,7 +187,7 @@ export function ComoFunciona() {
                 >
                   <div
                     className={cn(
-                      "group relative overflow-hidden rounded-3xl p-8 md:p-10",
+                      "group relative overflow-hidden rounded-3xl p-6 sm:p-8 md:p-10",
                       "bg-gradient-to-br from-white via-white to-bb-pink/5",
                       "border border-bb-pink/10",
                       "shadow-[0_18px_40px_-15px_rgba(61,26,110,0.18)]",
@@ -198,7 +198,7 @@ export function ComoFunciona() {
                     {/* Número gigante con depth real (animado por GSAP) */}
                     <span
                       aria-hidden
-                      className="como-num pointer-events-none absolute -right-3 -top-12 select-none text-[6rem] sm:text-[8rem] md:text-[10rem] font-black leading-none text-bb-pink-soft"
+                      className="como-num pointer-events-none absolute right-2 -top-4 sm:-right-2 sm:-top-8 md:-right-3 md:-top-12 select-none text-[3.5rem] sm:text-[6rem] md:text-[8rem] lg:text-[10rem] font-black leading-none text-bb-pink-soft"
                       style={{ transform: "translateZ(-80px)" }}
                     >
                       {p.num}
@@ -224,7 +224,7 @@ export function ComoFunciona() {
 
         <div className="mt-14 text-center">
           <Button size="lg" onClick={() => open()}>
-            Yo solo quiero abrir esa puerta → Empezar ahora
+            Quiero abrir esa puerta →
           </Button>
           <p className="mt-3 text-sm text-bb-text/65">
             Gratis · Sin compromiso · Respuesta en menos de 15 minutos

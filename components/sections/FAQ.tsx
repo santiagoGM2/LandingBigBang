@@ -16,19 +16,19 @@ import { useHasMounted } from "@/lib/use-has-mounted";
 const FAQS: Array<{ q: string; a: string }> = [
   {
     q: "¿Con cuánto tiempo debo hacer mi pedido?",
-    a: "Lo ideal es con 3 días de anticipación para garantizar tu diseño y materiales. Si es urgente, escríbenos — con mínimo 24 horas podemos hacer magia, sujeto a disponibilidad de cupos.",
+    a: "Lo ideal es con 3 días de anticipación para garantizar tu diseño y materiales. Si es urgente, escríbenos: con mínimo 24 horas podemos hacer magia, sujeto a disponibilidad de cupos.",
   },
   {
     q: "¿Hacen entregas en toda Cali?",
-    a: "Sí, cubrimos toda Cali. Puedes elegir entre recoger en nuestra tienda en la Calle 9 # 30-44, o recibir tu decoración a domicilio — el costo del envío se coordina al momento del pedido.",
+    a: "Sí, cubrimos toda Cali. Puedes elegir entre recoger en nuestra tienda en la Calle 9 # 30-44, o recibir tu decoración a domicilio. El costo del envío se coordina al momento del pedido.",
   },
   {
     q: "¿Puedo pedir algo que no esté en los códigos?",
-    a: "Por supuesto. Los códigos son el punto de partida, no el límite. Todo se personaliza al 100% — colores, elementos, mensajes, temática. Si lo imaginas, nosotros lo creamos.",
+    a: "Por supuesto. Los códigos son el punto de partida, no el límite. Todo se personaliza al 100%: colores, elementos, mensajes, temática. Si lo imaginas, nosotros lo creamos.",
   },
   {
     q: "¿Cuál es el precio mínimo?",
-    a: "Tenemos bouquets de globos desde $25.000 pesos. Para decoraciones más elaboradas o eventos, el precio varía según el diseño — por eso el quiz nos ayuda a entender exactamente qué necesitas antes de darte una cifra.",
+    a: "Tenemos bouquets de globos desde $25.000 pesos. Para decoraciones más elaboradas o eventos, el precio varía según el diseño. Por eso el quiz nos ayuda a entender exactamente qué necesitas antes de darte una cifra.",
   },
   {
     q: "¿También trabajan para eventos grandes?",
@@ -36,7 +36,7 @@ const FAQS: Array<{ q: string; a: string }> = [
   },
   {
     q: "¿Qué incluye exactamente una decoración?",
-    a: "Todo lo que necesita para quedar perfecta — materiales completos, diseño y mano de obra. Tú solo te preocupas por abrir la puerta.",
+    a: "Todo lo que necesita para quedar perfecta: materiales completos, diseño y mano de obra. Tú solo te preocupas por abrir la puerta.",
   },
   {
     q: "¿Cómo se paga?",

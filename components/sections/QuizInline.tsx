@@ -46,7 +46,7 @@ const BULLETS: Bullet[] = [
     icon: Target,
     text: "Diseñado exactamente para la persona que quieres sorprender",
   },
-  { icon: MapPin, text: "Entrega en tu puerta o recoge en tienda — tú decides" },
+  { icon: MapPin, text: "Entrega en tu puerta o recoge en tienda. Tú decides" },
   { icon: CreditCard, text: "Sin pago adelantado para reservar tu fecha" },
 ];
 
