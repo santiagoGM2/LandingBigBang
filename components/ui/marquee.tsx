@@ -37,11 +37,24 @@ export function Marquee({
       ? "animate-marquee-rev"
       : "animate-marquee";
 
+  // Para que el loop sea seamless, la distancia entre el primer item de la
+  // copia 1 y el primer item de la copia 2 debe ser exactamente el 50% del
+  // ancho del track. Logramos eso poniendo el gap SOLO entre items dentro
+  // de cada copia y agregando un padding-end del mismo tamaño a cada copia
+  // (que actúa como separador hacia la siguiente). Sin esto, un gap en el
+  // track padre genera un offset que produce un micro-jump al loopear.
+  const innerStyle = vertical
+    ? { gap, paddingBottom: gap }
+    : { gap, paddingRight: gap };
+
   return (
     <div
       className={cn(
-        "group relative flex w-full overflow-hidden",
-        vertical ? "h-full flex-col" : "flex-row",
+        "group relative flex w-full",
+        // overflow-x-clip permite que contenido rotado/escalado extienda
+        // verticalmente sin ser cortado, mientras que el scroll horizontal
+        // del marquee sigue oculto.
+        vertical ? "overflow-y-clip h-full flex-col" : "overflow-x-clip flex-row",
         pauseOnHover && "[&_.bb-marquee-track:hover]:[animation-play-state:paused]",
         className
       )}
@@ -53,12 +66,19 @@ export function Marquee({
           vertical ? "flex-col" : "flex-row",
           trackAnim
         )}
-        style={{ animationDuration: `${duration}s`, gap }}
+        style={{ animationDuration: `${duration}s`, willChange: "transform" }}
       >
-        <div className={cn("flex shrink-0", vertical ? "flex-col" : "flex-row")} style={{ gap }}>
+        <div
+          className={cn("flex shrink-0", vertical ? "flex-col" : "flex-row")}
+          style={innerStyle}
+        >
           {children}
         </div>
-        <div className={cn("flex shrink-0", vertical ? "flex-col" : "flex-row")} style={{ gap }} aria-hidden>
+        <div
+          className={cn("flex shrink-0", vertical ? "flex-col" : "flex-row")}
+          style={innerStyle}
+          aria-hidden
+        >
           {children}
         </div>
       </div>

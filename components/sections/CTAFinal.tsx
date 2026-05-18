@@ -13,6 +13,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 import { useQuiz } from "@/components/quiz/QuizProvider";
+import { PartyParticles } from "@/components/decor/PartyParticles";
 import { useHasMounted } from "@/lib/use-has-mounted";
 import { useIsDesktop } from "@/lib/use-media-query";
 import { cn } from "@/lib/utils";
@@ -132,6 +133,19 @@ export function CTAFinal() {
         style={{ backgroundImage: NOISE_URL, backgroundSize: "160px 160px" }}
       />
 
+      {/* Partículas glyph flotantes (capa decorativa) */}
+      <PartyParticles count={40} variant="white" />
+
+      {/* Globos SVG decorativos en esquinas (estáticos) */}
+      <BalloonGlyph
+        className="pointer-events-none absolute -left-4 top-10 h-24 w-24 text-bb-lime/25 sm:h-28 sm:w-28 md:left-8 md:top-16 md:h-32 md:w-32"
+        rotation={-12}
+      />
+      <BalloonGlyph
+        className="pointer-events-none absolute -right-4 bottom-10 h-28 w-28 text-bb-pink/25 sm:h-32 sm:w-32 md:right-10 md:bottom-16 md:h-40 md:w-40"
+        rotation={14}
+      />
+
       <div
         ref={contentRef}
         className="relative z-10 mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center"
@@ -189,5 +203,36 @@ export function CTAFinal() {
         </div>
       </div>
     </section>
+  );
+}
+
+/** Globo SVG simple para decoración estática. Trazo coloreado por currentColor. */
+function BalloonGlyph({
+  className,
+  rotation = 0,
+}: {
+  className?: string;
+  rotation?: number;
+}) {
+  return (
+    <svg
+      aria-hidden
+      viewBox="0 0 64 96"
+      fill="none"
+      className={className}
+      style={{ transform: `rotate(${rotation}deg)` }}
+    >
+      <path
+        d="M32 4c14.36 0 26 11.64 26 26 0 15.5-11.6 30-26 38C17.6 60 6 45.5 6 30 6 15.64 17.64 4 32 4Z"
+        fill="currentColor"
+      />
+      <path
+        d="M32 68l-2.4 6.4c-1.2 3.2.4 6.4 3.2 8l1.2.8c1.6 1.2 1.6 3.6 0 4.8L31.6 90"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        opacity="0.6"
+      />
+    </svg>
   );
 }

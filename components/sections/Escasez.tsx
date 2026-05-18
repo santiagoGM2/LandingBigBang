@@ -4,6 +4,7 @@ import * as React from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { CalendarClock } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { PartyParticles } from "@/components/decor/PartyParticles";
 import { useQuiz } from "@/components/quiz/QuizProvider";
 import { useHasMounted } from "@/lib/use-has-mounted";
 
@@ -91,6 +92,9 @@ export function Escasez({ cuposOcupados = 2, cuposTotal = 3 }: Props) {
         className="pointer-events-none absolute inset-0 z-0 opacity-50 mix-blend-overlay"
         style={{ backgroundImage: NOISE_URL, backgroundSize: "160px 160px" }}
       />
+
+      {/* Partículas party-themed glyphs flotando de fondo */}
+      <PartyParticles count={28} variant="white" />
 
       <div className="relative z-10 mx-auto w-full max-w-3xl px-4 sm:px-6 lg:px-8 text-center">
         <motion.div

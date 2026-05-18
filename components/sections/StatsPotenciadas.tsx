@@ -135,8 +135,8 @@ export function StatsPotenciadas() {
       <div className="mx-auto max-w-7xl px-6">
         <div className="mx-auto max-w-3xl text-center">
           <h2 className="text-3xl md:text-4xl font-extrabold text-bb-purple leading-tight">
-            Números que no mienten.{" "}
-            <span className="text-bb-pink">
+            <span className="block">Números que no mienten.</span>
+            <span className="block text-bb-pink">
               Detrás de cada globo hay una historia real.
             </span>
           </h2>
@@ -146,26 +146,6 @@ export function StatsPotenciadas() {
         </div>
 
         <div className="relative mt-12">
-          {/* Línea decorativa horizontal (solo desktop) */}
-          <svg
-            aria-hidden
-            className="pointer-events-none absolute left-0 right-0 top-[140px] z-0 hidden lg:block"
-            height="2"
-            width="100%"
-          >
-            <line
-              x1="6%"
-              x2="94%"
-              y1="1"
-              y2="1"
-              stroke="#E91E8C"
-              strokeWidth="2"
-              strokeDasharray="2 8"
-              strokeLinecap="round"
-              opacity="0.45"
-            />
-          </svg>
-
           <div
             ref={gridRef}
             className="relative z-10 grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-4"

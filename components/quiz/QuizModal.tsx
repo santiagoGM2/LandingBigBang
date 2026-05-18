@@ -678,7 +678,7 @@ export function QuizModal({
                 </AnimatePresence>
               </div>
 
-              <div className="sticky bottom-0 -mx-5 md:-mx-10 mt-6 flex items-center justify-between gap-3 border-t border-bb-purple/10 bg-white/95 px-5 py-3 backdrop-blur-sm md:static md:mx-0 md:mt-8 md:border-0 md:bg-transparent md:px-0 md:py-0 md:backdrop-blur-none">
+              <div className="sticky bottom-0 -mx-5 md:-mx-10 mt-6 flex items-center justify-between gap-3 border-t border-bb-purple/10 bg-white/95 px-5 md:px-10 py-3 md:py-4 backdrop-blur-sm z-10">
                 <Button
                   type="button"
                   variant="ghost"
