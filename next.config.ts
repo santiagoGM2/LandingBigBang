@@ -9,6 +9,7 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "randomuser.me" },
       { protocol: "https", hostname: "picsum.photos" },
       { protocol: "https", hostname: "assets.cdn.filesafe.space" },
+      { protocol: "https", hostname: "lh3.googleusercontent.com" },
     ],
   },
   experimental: {
