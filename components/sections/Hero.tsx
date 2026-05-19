@@ -146,7 +146,11 @@ export function Hero() {
           solamente, no overflow-hidden). */}
       <div className="relative z-10 flex-shrink-0 py-10 sm:py-12 md:py-14">
         <Marquee
-          duration={30}
+          /* La duracion se escala proporcionalmente al numero de fotos para
+             mantener la misma velocidad visual (px/seg) que el set original
+             de 20 fotos a 30s. Como ahora hay 54 fotos el track es 2.7x mas
+             ancho, por eso duration = 30 * (length/20) redondeado. */
+          duration={Math.round((IMAGES.length / 20) * 30)}
           className="!overflow-x-clip overflow-y-visible [mask-image:linear-gradient(90deg,transparent,#000_8%,#000_92%,transparent)]"
         >
           {IMAGES.map((img, i) => (
