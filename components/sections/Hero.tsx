@@ -91,7 +91,7 @@ export function Hero() {
         className="pointer-events-none absolute inset-0 bg-[radial-gradient(120%_60%_at_50%_0%,rgba(233,30,140,0.08),transparent_70%)]"
       />
 
-      <div className="relative z-10 flex flex-1 flex-col items-center justify-center px-4 pt-6 pb-2 text-center sm:pt-8 md:pt-10 lg:pt-6 lg:pb-4">
+      <div className="relative z-10 flex flex-1 flex-col items-center justify-center px-4 pt-12 pb-2 text-center sm:pt-16 md:pt-20 lg:pt-16 lg:pb-4">
         {/* Tagline pill con glassmorphism leve */}
         <span className="inline-flex items-center gap-2 rounded-full border border-bb-purple/15 bg-bb-white/50 px-4 py-1.5 text-xs sm:text-sm font-bold text-bb-purple backdrop-blur-sm shadow-bb-soft">
           <span className="h-2 w-2 rounded-full bg-bb-pink" />

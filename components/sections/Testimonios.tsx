@@ -140,22 +140,33 @@ export function Testimonios() {
                 </p>
 
                 <div className="mt-5 flex items-center gap-3 border-t border-bb-text/10 pt-4">
-                  <div className="relative h-10 w-10 flex-shrink-0 overflow-hidden rounded-full ring-1 ring-bb-purple/10">
-                    <Image
-                      src={t.avatar}
-                      alt={`Foto de perfil de ${t.name}`}
-                      fill
-                      sizes="40px"
-                      unoptimized
-                      className="object-cover"
-                    />
+                  {/* Wrapper externo SIN overflow-hidden: el badge G se sale del
+                      círculo del avatar y necesita estar fuera del clip. */}
+                  <div className="relative inline-block flex-shrink-0">
+                    {/* Avatar: clip circular vive solo en este nivel */}
+                    <div className="relative h-12 w-12 overflow-hidden rounded-full ring-2 ring-white shadow-[0_2px_6px_-2px_rgba(61,26,110,0.25)]">
+                      <Image
+                        src={t.avatar}
+                        alt={`Foto de perfil de ${t.name}`}
+                        fill
+                        sizes="48px"
+                        unoptimized
+                        className="object-cover"
+                      />
+                    </div>
+                    {/* Badge G fuera del clip del avatar */}
+                    <span
+                      aria-hidden
+                      className="absolute -bottom-0.5 -right-0.5 grid h-5 w-5 place-items-center rounded-full bg-white shadow-[0_2px_6px_-1px_rgba(0,0,0,0.18)] ring-1 ring-bb-text/10"
+                    >
+                      <GoogleGlyph className="h-3 w-3" />
+                    </span>
                   </div>
                   <div className="min-w-0">
                     <div className="truncate text-sm font-bold text-bb-text">
                       {t.name}
                     </div>
-                    <div className="flex items-center gap-1 text-xs text-bb-text/60">
-                      <GoogleGlyph className="h-3 w-3" aria-hidden />
+                    <div className="text-xs text-bb-text/60">
                       Reseña verificada en Google
                     </div>
                   </div>

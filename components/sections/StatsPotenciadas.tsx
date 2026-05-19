@@ -121,7 +121,7 @@ export function StatsPotenciadas() {
             rotateY: -90,
             stagger: 0.08,
             duration: 0.55,
-            ease: "back.out(1.2)",
+            ease: "power3.out",
           },
           "-=0.15"
         );
