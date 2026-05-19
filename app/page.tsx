@@ -17,7 +17,6 @@ import { FAQ } from "@/components/sections/FAQ";
 import { CTAFinal } from "@/components/sections/CTAFinal";
 import { Footer } from "@/components/sections/Footer";
 import { WhatsAppFAB } from "@/components/WhatsAppFAB";
-import { ScrollCTA } from "@/components/ScrollCTA";
 
 export default function Page() {
   return (
@@ -40,7 +39,6 @@ export default function Page() {
         </main>
         <Footer />
         <WhatsAppFAB />
-        <ScrollCTA />
         <Toaster
           position="bottom-center"
           theme="light"
