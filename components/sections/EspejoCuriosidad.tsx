@@ -24,11 +24,12 @@ export function EspejoCuriosidad() {
       aria-label="Por qué importa cómo se siente"
     >
       <FlowArt aria-label="Tres preguntas que cambian cómo elegís una sorpresa">
-        {/* ─── Escena 01 · bb-purple ─────────────────────────── */}
+        {/* ─── Escena 01 · bb-purple con gradient sutil ──────── */}
         <FlowSection
           aria-label="Por qué algunos se vuelven el héroe"
           style={{
-            backgroundColor: "var(--bb-purple)",
+            backgroundImage:
+              "radial-gradient(120% 80% at 20% 0%, rgba(233,30,140,0.22), transparent 60%), linear-gradient(160deg, var(--bb-purple) 0%, #2c1352 100%)",
             color: "#ffffff",
             paddingTop: "clamp(1.5rem, 5vw, 3rem)",
             paddingBottom: "clamp(1.5rem, 4vw, 3rem)",
@@ -51,8 +52,8 @@ export function EspejoCuriosidad() {
             </SceneCopy>
 
             <SceneImage
-              id="1530103862676-de8c9debad1d"
-              alt="Arco de globos colorido en montaje de fiesta"
+              src="/decoraciones/elegantes/pareja-cumpleanos-35-oro-rosa-burbuja.jpg"
+              alt="Bouquet elegante para 35 años en oro rosa"
             />
           </SceneBody>
 
@@ -61,11 +62,12 @@ export function EspejoCuriosidad() {
           </SceneFootline>
         </FlowSection>
 
-        {/* ─── Escena 02 · bb-pink ───────────────────────────── */}
+        {/* ─── Escena 02 · bb-pink con gradient sutil ────────── */}
         <FlowSection
           aria-label="No es el precio, es la emoción"
           style={{
-            backgroundColor: "var(--bb-pink)",
+            backgroundImage:
+              "radial-gradient(110% 80% at 80% 0%, rgba(255,217,61,0.22), transparent 55%), linear-gradient(155deg, var(--bb-pink) 0%, #c2156f 100%)",
             color: "#ffffff",
             paddingTop: "clamp(1.5rem, 5vw, 3rem)",
             paddingBottom: "clamp(1.5rem, 4vw, 3rem)",
@@ -77,8 +79,8 @@ export function EspejoCuriosidad() {
 
           <SceneBody reverse>
             <SceneImage
-              id="1576337631739-92b58dca2c63"
-              alt="Mesa de dulces con donas y postres ornamentada"
+              src="/decoraciones/romanticos/pareja-aniversario-amor-oso-ruby.png"
+              alt="Decoración romántica con oso Ruby y globos de amor"
             />
 
             <SceneCopy>
@@ -97,11 +99,12 @@ export function EspejoCuriosidad() {
           </SceneFootline>
         </FlowSection>
 
-        {/* ─── Escena 03 · bb-lime con texto bb-purple + CTA ─── */}
+        {/* ─── Escena 03 · bb-lime con gradient + CTA ────────── */}
         <FlowSection
           aria-label="No estás comprando globos"
           style={{
-            backgroundColor: "var(--bb-lime)",
+            backgroundImage:
+              "radial-gradient(100% 80% at 30% 100%, rgba(233,30,140,0.18), transparent 60%), linear-gradient(170deg, var(--bb-lime) 0%, #6cb31a 100%)",
             color: "var(--bb-purple)",
             paddingTop: "clamp(1.5rem, 5vw, 3rem)",
             paddingBottom: "clamp(1.5rem, 4vw, 3rem)",
@@ -138,8 +141,8 @@ export function EspejoCuriosidad() {
             </SceneCopy>
 
             <SceneImage
-              id="1492684223066-81342ee5ff30"
-              alt="Montaje completo de fiesta con globos"
+              src="/decoraciones/infantiles/hija-cumpleanos-burbuja-princesa-neon.png"
+              alt="Burbuja de princesa con luces neón"
               dark
             />
           </SceneBody>
@@ -234,11 +237,11 @@ function SceneFootline({
 }
 
 function SceneImage({
-  id,
+  src,
   alt,
   dark = false,
 }: {
-  id: string;
+  src: string;
   alt: string;
   dark?: boolean;
 }) {
@@ -252,12 +255,11 @@ function SceneImage({
       }}
     >
       <Image
-        src={`https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=720&h=900&q=80`}
+        src={src}
         alt={alt}
         fill
         sizes="(min-width:1024px) 30vw, (min-width:768px) 35vw, 70vw"
         className="object-cover"
-        unoptimized
       />
       <div
         aria-hidden

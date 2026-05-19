@@ -108,7 +108,14 @@ export function ConexionEmocional() {
   };
 
   return (
-    <section ref={sectionRef} className="relative bg-bb-white py-20 md:py-28">
+    <section
+      ref={sectionRef}
+      className="relative py-20 md:py-28"
+      style={{
+        backgroundImage:
+          "radial-gradient(80% 60% at 100% 0%, rgba(233,30,140,0.06), transparent 60%), radial-gradient(70% 60% at 0% 100%, rgba(125,199,32,0.05), transparent 60%), linear-gradient(180deg, #ffffff 0%, #fefafd 100%)",
+      }}
+    >
       <div className="mx-auto max-w-7xl px-6">
         <div className="grid items-center gap-12 md:grid-cols-2">
           {/* Imagen con parallax */}
@@ -117,12 +124,11 @@ export function ConexionEmocional() {
             className="relative aspect-[4/5] overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-bb-pink-soft to-bb-purple-soft/30 shadow-bb-soft md:aspect-[4/4]"
           >
             <Image
-              src="https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=900&h=1100&q=80"
-              alt="Manos abriendo un regalo en una fiesta de cumpleaños"
+              src="/decoraciones/elegantes/mama-papa-cumpleanos-tia-rosa-rose-gold-mariposas.jpg"
+              alt="Bouquet de cumpleaños con mariposas en rose gold"
               fill
               sizes="(min-width:768px) 50vw, 100vw"
               className="object-cover"
-              unoptimized
             />
             <div className="absolute inset-0 bg-gradient-to-t from-bb-purple/30 via-transparent to-transparent" />
           </div>
