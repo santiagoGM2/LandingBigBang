@@ -111,27 +111,29 @@ export function Hero() {
 
       <div className="relative z-10 flex flex-1 flex-col items-center justify-center px-4 pt-6 pb-2 text-center sm:pt-12 md:pt-20 lg:pt-16 lg:pb-4">
         {/* Tagline pill con glassmorphism leve */}
-        <span className="inline-flex items-center gap-2 rounded-full border border-bb-purple/15 bg-bb-white/50 px-3 py-1 text-[11px] sm:text-sm font-bold text-bb-purple backdrop-blur-sm shadow-bb-soft">
+        <span className="inline-flex items-center gap-2 rounded-full border border-bb-purple/15 bg-bb-white/50 px-3.5 py-1.5 text-xs font-bold text-bb-purple backdrop-blur-sm shadow-bb-soft sm:text-sm">
           <span className="h-2 w-2 rounded-full bg-bb-pink" />
           {TAGLINE}
         </span>
 
-        {/* Title — color bb-text con keyword en bb-pink */}
-        <h1 className="mt-3 max-w-4xl text-[20px] sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-extrabold leading-[1.15] tracking-tight text-bb-text sm:mt-4">
+        {/* Title — color bb-text con keyword en bb-pink. La pregunta es el
+            anchor emocional de la landing, por eso en mobile arranca en
+            26px y escala hasta 60px en xl. */}
+        <h1 className="mt-4 max-w-4xl text-[26px] font-extrabold leading-[1.12] tracking-tight text-bb-text sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl">
           ¿Por qué algunas personas se convierten en el{" "}
           <span className="text-bb-pink">héroe de la familia</span> con una sola
           sorpresa… y otras gastan el doble y nadie recuerda nada?
         </h1>
 
-        <p className="mt-3 max-w-2xl text-sm leading-relaxed text-bb-text/70 sm:mt-4 sm:text-base md:text-lg">
+        <p className="mt-4 max-w-2xl text-base leading-relaxed text-bb-text/70 sm:text-lg md:text-xl">
           {DESCRIPTION}
         </p>
 
-        <div className="mt-5 flex justify-center sm:mt-6">
+        <div className="mt-6 flex justify-center">
           <Button
-            size="xl"
+            size="lg"
             onClick={() => open()}
-            className="bg-bb-pink hover:bg-bb-pink/90 focus:ring-bb-pink/40"
+            className="bg-bb-pink hover:bg-bb-pink/90 focus:ring-bb-pink/40 sm:h-16 sm:px-10 sm:text-xl"
           >
             <Sparkles className="h-5 w-5" />
             {CTA_TEXT}
