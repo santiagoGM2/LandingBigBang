@@ -12,24 +12,90 @@ import { useQuiz } from "@/components/quiz/QuizProvider";
 import { LOADING_COMPLETE_EVENT } from "@/components/LoadingScreen";
 import { cn } from "@/lib/utils";
 
-// 14 imágenes Unsplash con foco party-decor (refresh respecto al set anterior).
-// Cuando el cliente entregue fotografía propia de sus montajes, reemplazar
-// estos IDs por archivos en public/portfolio/* y sacar el `unoptimized`.
-const IMAGES: Array<{ id: string; alt: string }> = [
-  { id: "1530103862676-de8c9debad1d", alt: "Arco de globos rosados" },
-  { id: "1513151233558-d860c5398176", alt: "Globos volando en celebración" },
-  { id: "1606800052052-a08af7148866", alt: "Arco de globos pastel" },
-  { id: "1530538095376-a4936b35b5f0", alt: "Mesa de cumpleaños decorada" },
-  { id: "1492684223066-81342ee5ff30", alt: "Niños en fiesta de cumpleaños" },
-  { id: "1518621012420-8ab0afd9e0c4", alt: "Setup de fiesta infantil" },
-  { id: "1620735692151-26a7e0748429", alt: "Baby shower pastel y bohemio" },
-  { id: "1623091410901-00e2d268901f", alt: "Globos coloridos en interior" },
-  { id: "1576337631739-92b58dca2c63", alt: "Mesa dulce con donas" },
-  { id: "1469371670807-013ccf25f16a", alt: "Cena romántica con velas" },
-  { id: "1610890716171-6b1bb98ffd09", alt: "Celebración de grado" },
-  { id: "1607344645866-009c320b63e0", alt: "Evento corporativo elegante" },
-  { id: "1481253127861-534498168948", alt: "Decoración floral de bautizo" },
-  { id: "1481419241566-7b8aac56e95f", alt: "Setup romántico aniversario" },
+// 20 fotos reales del portafolio Big Bang (mix curado de las 6 categorías).
+// El orden alterna categorías para que el carrusel no muestre dos imágenes
+// muy parecidas adyacentes y se sienta variado al loopear.
+const IMAGES: Array<{ src: string; alt: string }> = [
+  {
+    src: "/decoraciones/infantiles/hijo-cumpleanos-spiderman-3.jpg",
+    alt: "Bouquet temático de Spider-Man",
+  },
+  {
+    src: "/decoraciones/elegantes/pareja-cumpleanos-35-oro-rosa-burbuja.jpg",
+    alt: "Burbuja oro rosa para 35 años",
+  },
+  {
+    src: "/decoraciones/minis/alguien-especial-cumpleanos-burbuja-mariposas-rose-gold.jpg",
+    alt: "Mini burbuja con mariposas rose gold",
+  },
+  {
+    src: "/decoraciones/romanticos/pareja-aniversario-amor-oso-ruby.png",
+    alt: "Decoración romántica con oso Ruby",
+  },
+  {
+    src: "/decoraciones/tematicos/alguien-especial-cumpleanos-tematica-fiesta-mexicana.png",
+    alt: "Decoración fiesta mexicana",
+  },
+  {
+    src: "/decoraciones/infantiles/hija-cumpleanos-burbuja-princesa-neon.png",
+    alt: "Burbuja princesa neón",
+  },
+  {
+    src: "/decoraciones/elegantes/mama-papa-cumpleanos-tia-rosa-rose-gold-mariposas.jpg",
+    alt: "Bouquet rose gold con mariposas",
+  },
+  {
+    src: "/decoraciones/anchetas/hijo-hija-cumpleanos-caja-regalo-mono-arcoiris.png",
+    alt: "Caja regalo con mono arcoíris",
+  },
+  {
+    src: "/decoraciones/minis/alguien-especial-cumpleanos-estrella-lila.jpg",
+    alt: "Mini decoración con estrella lila",
+  },
+  {
+    src: "/decoraciones/romanticos/pareja-otra-ocasion-propuesta-matrimonio-rojo.jpg",
+    alt: "Decoración propuesta matrimonio en rojo",
+  },
+  {
+    src: "/decoraciones/infantiles/hijo-hija-cumpleanos-harry-potter-lechuza.jpg",
+    alt: "Decoración Harry Potter con lechuza",
+  },
+  {
+    src: "/decoraciones/elegantes/alguien-especial-cumpleanos-hbd-negro-corona-plata.jpg",
+    alt: "HBD negro y plata con corona",
+  },
+  {
+    src: "/decoraciones/tematicos/alguien-especial-cumpleanos-tematica-casino.jpg",
+    alt: "Decoración temática casino",
+  },
+  {
+    src: "/decoraciones/minis/alguien-especial-cumpleanos-burbuja-elegante-dorado.jpg",
+    alt: "Mini burbuja elegante dorada",
+  },
+  {
+    src: "/decoraciones/infantiles/hijo-cumpleanos-granja-vaca-gallo.jpg",
+    alt: "Decoración temática granja",
+  },
+  {
+    src: "/decoraciones/romanticos/pareja-aniversario-duo-burbujas-verde-blanco.png",
+    alt: "Dúo de burbujas verde y blanco",
+  },
+  {
+    src: "/decoraciones/elegantes/mama-papa-cumpleanos-abuela-99-oro-rosa.png",
+    alt: "Bouquet 99 años en oro rosa",
+  },
+  {
+    src: "/decoraciones/minis/alguien-especial-cumpleanos-burbuja-rosa-lettering.png",
+    alt: "Mini burbuja rosa con lettering",
+  },
+  {
+    src: "/decoraciones/tematicos/hijo-cumpleanos-futbol-america-pepsi-9.jpg",
+    alt: "Decoración temática fútbol América",
+  },
+  {
+    src: "/decoraciones/anchetas/pareja-aniversario-ancheta-cerveza-heineken.jpg",
+    alt: "Ancheta cervecera de aniversario",
+  },
 ];
 
 const TAGLINE = "Decoraciones que se convierten en recuerdos";
@@ -130,7 +196,7 @@ export function Hero() {
           className="[mask-image:linear-gradient(90deg,transparent,#000_8%,#000_92%,transparent)]"
         >
           {IMAGES.map((img, i) => (
-            <HeroTile key={img.id} img={img} index={i} />
+            <HeroTile key={img.src} img={img} index={i} />
           ))}
         </Marquee>
       </div>
@@ -150,7 +216,7 @@ function HeroTile({
   img,
   index,
 }: {
-  img: { id: string; alt: string };
+  img: { src: string; alt: string };
   index: number;
 }) {
   // Aspect 3/4 → ancho 200 × alto 267 (aproximado)
@@ -171,12 +237,12 @@ function HeroTile({
       )}
     >
       <Image
-        src={`https://images.unsplash.com/photo-${img.id}?auto=format&fit=crop&w=520&h=700&q=80`}
+        src={img.src}
         alt={img.alt}
         fill
-        sizes="200px"
+        sizes="(min-width:768px) 200px, 180px"
         className="object-cover"
-        unoptimized
+        priority={index < 6}
       />
     </div>
   );

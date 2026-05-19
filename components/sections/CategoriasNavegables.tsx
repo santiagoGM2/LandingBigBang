@@ -22,6 +22,8 @@ import { useHasMounted } from "@/lib/use-has-mounted";
 import {
   CODIGOS_DEC,
   CATEGORIA_LABEL,
+  CATEGORIA_MICROCOPY,
+  getCover,
   type Categoria,
   type CodigoDec,
 } from "@/lib/codigos-dec";
@@ -35,64 +37,38 @@ const COUNT_BY_CAT: Record<Categoria, number> = CODIGOS_DEC.reduce(
   {} as Record<Categoria, number>
 );
 
+const ORDER: Categoria[] = [
+  "infantiles",
+  "elegantes",
+  "tematicos",
+  "romanticos",
+  "anchetas",
+  "minis",
+];
+
+const COVER_ALT: Record<Categoria, string> = {
+  infantiles: "Decoración temática infantil con globos",
+  elegantes: "Bouquet elegante con metalizados y oro",
+  tematicos: "Decoración temática personalizada",
+  romanticos: "Decoración romántica con osos y burbujas",
+  anchetas: "Ancheta de regalo con peluches y dulces",
+  minis: "Mini burbuja decorativa para centro de mesa",
+};
+
 /**
- * 7 items (Empresarial movido al footer) — labels, imágenes y microcopy
- * emocional. onClick además dispara un toast confirmando la categoría.
+ * 6 categorías reales del cliente — labels marketing + cover de foto real
+ * extraída de cada subcarpeta + conteo dinámico. onClick dispara toast.
  */
 function buildItems(
   pickCategoria: (c: Categoria, label: string) => void
 ): ImageGalleryItem[] {
-  return [
-    {
-      src: "https://images.unsplash.com/photo-1530103862676-de8c9debad1d?auto=format&fit=crop&w=600&h=900&q=80",
-      alt: "Decoración cumpleaños infantil",
-      label: "Cumple infantil",
-      microcopy: `+${COUNT_BY_CAT.cumple_infantil} diseños · el más pedido`,
-      onClick: () => pickCategoria("cumple_infantil", "Cumple infantil"),
-    },
-    {
-      src: "https://images.unsplash.com/photo-1464349095431-e9a21285b5f3?auto=format&fit=crop&w=600&h=900&q=80",
-      alt: "Decoración cumpleaños adulto",
-      label: "Cumple adulto",
-      microcopy: `+${COUNT_BY_CAT.cumple_adulto} diseños · ideal para sorpresas`,
-      onClick: () => pickCategoria("cumple_adulto", "Cumple adulto"),
-    },
-    {
-      src: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=600&h=900&q=80",
-      alt: "Decoración baby shower",
-      label: "Baby shower",
-      microcopy: `+${COUNT_BY_CAT.baby} diseños · dulce y especial`,
-      onClick: () => pickCategoria("baby", "Baby shower"),
-    },
-    {
-      src: "https://images.unsplash.com/photo-1513151233558-d860c5398176?auto=format&fit=crop&w=600&h=900&q=80",
-      alt: "Decoración bautizo y comunión",
-      label: "Bautizo / Comunión",
-      microcopy: `+${COUNT_BY_CAT.religioso} diseños · elegante y emotivo`,
-      onClick: () => pickCategoria("religioso", "Bautizo / Comunión"),
-    },
-    {
-      src: "https://images.unsplash.com/photo-1523580494863-6f3031224c94?auto=format&fit=crop&w=600&h=900&q=80",
-      alt: "Decoración graduación",
-      label: "Grado",
-      microcopy: `+${COUNT_BY_CAT.grado} diseños · el momento del orgullo`,
-      onClick: () => pickCategoria("grado", "Grado"),
-    },
-    {
-      src: "https://images.unsplash.com/photo-1519225421980-715cb0215aed?auto=format&fit=crop&w=600&h=900&q=80",
-      alt: "Decoración romántica",
-      label: "Romántico",
-      microcopy: `+${COUNT_BY_CAT.romantico} diseños · el favorito de las parejas`,
-      onClick: () => pickCategoria("romantico", "Romántico"),
-    },
-    {
-      src: "https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?auto=format&fit=crop&w=600&h=900&q=80",
-      alt: "Decoración temática especial",
-      label: "Especial",
-      microcopy: `+${COUNT_BY_CAT.especial} diseños · cuando lo común no alcanza`,
-      onClick: () => pickCategoria("especial", "Especial"),
-    },
-  ];
+  return ORDER.map((cat) => ({
+    src: getCover(cat),
+    alt: COVER_ALT[cat],
+    label: CATEGORIA_LABEL[cat],
+    microcopy: `+${COUNT_BY_CAT[cat]} diseños · ${CATEGORIA_MICROCOPY[cat]}`,
+    onClick: () => pickCategoria(cat, CATEGORIA_LABEL[cat]),
+  }));
 }
 
 export function CategoriasNavegables() {
@@ -259,12 +235,12 @@ function MobileGrid({ items }: { items: ImageGalleryItem[] }) {
           aria-label={`Explorar categoría ${item.label}`}
           className="relative aspect-[3/4] overflow-hidden rounded-2xl cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-bb-pink focus-visible:ring-offset-2"
         >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+          <Image
             src={item.src}
             alt={item.alt}
-            className="absolute inset-0 h-full w-full object-cover"
-            loading="lazy"
+            fill
+            sizes="(min-width:640px) 33vw, 50vw"
+            className="object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-bb-purple/95 via-bb-purple/40 to-transparent" />
           <div className="absolute inset-x-0 bottom-0 p-3">
@@ -363,11 +339,10 @@ function CodigoCard({
       <div className="relative aspect-[4/5] w-full overflow-hidden bg-gradient-to-br from-bb-pink-soft to-bb-purple-soft/30">
         <Image
           src={codigo.img}
-          alt={`${codigo.codigo}: ${codigo.titulo}`}
+          alt={codigo.alt}
           fill
           sizes="(min-width:1024px) 33vw, (min-width:640px) 50vw, 100vw"
           className="object-cover transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.04]"
-          unoptimized
         />
         <div className="absolute inset-0 bg-gradient-to-t from-bb-purple/20 via-transparent to-transparent" />
       </div>

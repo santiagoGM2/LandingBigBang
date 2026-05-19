@@ -115,36 +115,34 @@ function categoriasFromContext(
   ocasion?: string
 ): Categoria[] {
   // Ocasión es el predictor más fuerte
-  if (ocasion === "Nuestro aniversario") return ["romantico"];
-  if (ocasion === "Está esperando un bebé") return ["baby"];
-  if (ocasion === "Se acaba de graduar") return ["grado"];
+  if (ocasion === "Nuestro aniversario") return ["romanticos", "minis"];
+  if (ocasion === "Está esperando un bebé") return ["anchetas", "minis"];
+  if (ocasion === "Se acaba de graduar") return ["tematicos", "elegantes"];
 
   if (ocasion === "Su cumpleaños") {
-    if (aQuien === "A mi hijo/hija") return ["cumple_infantil"];
-    if (aQuien === "A mi pareja") return ["cumple_adulto", "romantico"];
-    if (aQuien === "A mi mamá / papá")
-      return ["cumple_adulto", "especial"];
-    if (aQuien === "A alguien especial")
-      return ["cumple_adulto", "especial"];
-    return ["cumple_adulto", "cumple_infantil"];
+    if (aQuien === "A mi hijo/hija") return ["infantiles", "anchetas"];
+    if (aQuien === "A mi pareja") return ["elegantes", "romanticos"];
+    if (aQuien === "A mi mamá / papá") return ["elegantes", "anchetas"];
+    if (aQuien === "A alguien especial") return ["elegantes", "minis"];
+    return ["elegantes", "infantiles"];
   }
 
   if (ocasion === "Sorpresa sin motivo") {
-    if (aQuien === "A mi pareja") return ["romantico", "especial"];
-    if (aQuien === "A mi hijo/hija") return ["cumple_infantil", "especial"];
-    return ["especial", "romantico", "cumple_adulto"];
+    if (aQuien === "A mi pareja") return ["romanticos", "anchetas"];
+    if (aQuien === "A mi hijo/hija") return ["infantiles", "anchetas"];
+    return ["anchetas", "minis", "elegantes"];
   }
 
   if (ocasion === "Otra ocasión especial") {
-    return ["especial", "romantico", "cumple_adulto"];
+    return ["tematicos", "romanticos", "elegantes"];
   }
 
   // Si solo conocemos aQuien (sin ocasion)
-  if (aQuien === "A mi hijo/hija") return ["cumple_infantil", "especial"];
-  if (aQuien === "A mi pareja") return ["romantico", "especial"];
+  if (aQuien === "A mi hijo/hija") return ["infantiles", "anchetas"];
+  if (aQuien === "A mi pareja") return ["romanticos", "minis"];
 
   // Fallback genérico: sample diverso para no morir vacío en ningún edge case
-  return ["especial", "cumple_adulto", "romantico"];
+  return ["elegantes", "minis", "romanticos"];
 }
 
 function pickGallery(
@@ -840,11 +838,10 @@ function PausaVisual({
           >
             <Image
               src={c.img}
-              alt={c.titulo}
+              alt={c.alt}
               fill
               sizes="(min-width:768px) 33vw, 50vw"
               className="object-cover"
-              unoptimized
             />
             <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-bb-purple/95 to-transparent p-2">
               <p className="text-xs font-bold text-white">{c.titulo}</p>
@@ -886,11 +883,10 @@ function CodigoSelector({
             <div className="relative aspect-[4/5] w-full bg-gradient-to-br from-bb-pink-soft to-bb-purple-soft/30">
               <Image
                 src={c.img}
-                alt={c.titulo}
+                alt={c.alt}
                 fill
                 sizes="(min-width:768px) 33vw, 50vw"
                 className="object-cover transition-transform duration-500 group-hover:scale-105"
-                unoptimized
               />
               {selected && (
                 <span className="absolute right-2 top-2 grid h-7 w-7 place-items-center rounded-full bg-bb-pink text-white shadow-lg">
